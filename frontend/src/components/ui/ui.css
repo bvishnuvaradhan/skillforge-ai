@@ -1,0 +1,215 @@
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.brand-mark__orb {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+  box-shadow: 0 0 22px rgba(24, 216, 255, 0.55), 0 0 34px rgba(139, 92, 246, 0.35);
+}
+
+.brand-mark__title {
+  display: block;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.top-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sf-card {
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--panel-shadow);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.sf-card--glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px rgba(24, 216, 255, 0.08),
+    var(--panel-shadow);
+}
+
+.sf-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  padding: 0.85rem 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.sf-button:hover {
+  transform: translateY(-1px);
+}
+
+.sf-button--primary {
+  color: white;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+  border-color: transparent;
+}
+
+.sf-button--secondary {
+  color: var(--foreground);
+  background: var(--chip-bg);
+}
+
+.nav-chip,
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  padding: 0.85rem 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--foreground);
+  background: var(--chip-bg);
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.nav-chip:hover,
+.action-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(24, 216, 255, 0.6);
+}
+
+.sf-field {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--foreground);
+}
+
+.sf-field__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.sf-field__hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.sf-field input,
+.sf-field textarea,
+.sf-field select {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  background: var(--surface-strong);
+  color: var(--foreground);
+  padding: 0.85rem 1rem;
+  outline: none;
+}
+
+.sf-field input:focus,
+.sf-field textarea:focus,
+.sf-field select:focus {
+  border-color: rgba(24, 216, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(24, 216, 255, 0.12);
+}
+
+.section-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.section-header__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sf-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.58);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.sf-modal {
+  width: min(640px, 100%);
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+}
+
+.sf-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sf-modal__body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sidebar {
+  display: grid;
+  gap: 1rem;
+  align-self: start;
+  padding: 1rem;
+  border-radius: var(--radius-xl);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.sidebar__nav {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  text-decoration: none;
+  color: var(--foreground);
+  background: var(--surface-soft);
+  border: 1px solid transparent;
+}
+
+.sidebar__link--active {
+  border-color: rgba(24, 216, 255, 0.6);
+  background: linear-gradient(135deg, rgba(24, 216, 255, 0.12), rgba(139, 92, 246, 0.12));
+}
+
+.sidebar__panel {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--panel-border);
+}

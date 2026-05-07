@@ -1,0 +1,9 @@
+.settings-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.settings-form {
+  display: grid;
+  gap: 1rem;
+}
