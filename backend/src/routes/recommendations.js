@@ -4,6 +4,7 @@ const { RecommendationModel } = require("../models/Recommendation");
 const { RecommendationHistoryModel } = require("../models/RecommendationHistory");
 const { generateRecommendations } = require("../recommendation/detector");
 const { filterByCooldowm } = require("../recommendation/cooldown");
+const { formatExplanationForDisplay } = require("../explanation/basic");
 const { z } = require("zod");
 
 const router = Router();
@@ -24,11 +25,15 @@ router.get("/", requireAuth, async (req, res) => {
     // Apply cool-down filter
     const filtered = await filterByCooldowm(recs);
 
-    // Add computed finalPriority to each
-    const enriched = filtered.map(rec => ({
-      ...rec.toObject(),
-      finalPriority: rec.getFinalPriority(50) // Default 50% confidence
-    }));
+    // Add computed finalPriority and formatted explanations
+    const enriched = filtered.map(rec => {
+      const obj = rec.toObject();
+      return {
+        ...obj,
+        finalPriority: rec.getFinalPriority(50),
+        display: formatExplanationForDisplay(rec, rec.evidence || {})
+      };
+    });
 
     res.status(200).json({ recommendations: enriched });
   } catch (error) {

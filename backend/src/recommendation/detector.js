@@ -4,6 +4,7 @@ const { SubmissionModel } = require("../models/Submission");
 const { AnalyticsSnapshotModel } = require("../models/AnalyticsSnapshot");
 const { RecommendationModel } = require("../models/Recommendation");
 const { RULES } = require("./rules");
+const { buildExplanation } = require("../explanation/basic");
 
 const RECOMMENDATION_EXPIRY = {
   revision: 3,
@@ -104,9 +105,23 @@ async function generateRecommendations(userId) {
     // 4. Deduplicate by (type + topic)
     const deduplicated = deduplicateRecommendations(recommendations);
 
-    // 5. Save to database with expiration dates
+    // 5. Add explanations to each recommendation
+    const withExplanations = deduplicated.map(rec => {
+      const explanation = buildExplanation(rec, rec.metrics);
+      return {
+        ...rec,
+        evidence: {
+          ...rec.evidence,
+          triggers: explanation.triggers,
+          keyMetrics: explanation.keyMetrics,
+          explanation: explanation.explanation
+        }
+      };
+    });
+
+    // 6. Save to database with expiration dates
     const savedRecs = [];
-    for (const rec of deduplicated) {
+    for (const rec of withExplanations) {
       const expiryDays = RECOMMENDATION_EXPIRY[rec.type] || 7;
       const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
 
