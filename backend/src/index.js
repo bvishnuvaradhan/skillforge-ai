@@ -8,6 +8,7 @@ const { connectDatabase } = require("./lib/db");
 const { authRouter } = require("./routes/auth");
 const { profileRouter } = require("./routes/profile");
 const { analyticsRouter } = require("./routes/analytics");
+const { recommendationsRouter } = require("./routes/recommendations");
 const { adminRouter } = require("./routes/admin");
 const { initWorkers } = require("./workers");
 const { scrapingQueue, analyticsQueue } = require("./lib/queue");
@@ -62,6 +63,7 @@ app.get("/api/v1", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/profiles", profileRouter);
 app.use("/api/analytics", analyticsRouter);
+app.use("/api/recommendations", recommendationsRouter);
 app.use("/api/admin", adminRouter);
 
 // NOTE: 404 handler will be registered after optional runtime mounts (e.g., Bull Board)
