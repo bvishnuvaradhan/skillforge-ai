@@ -7,13 +7,16 @@ const codingProfileSchema = new Schema(
     username: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     lastSyncedAt: { type: Date },
-    syncStatus: { type: String, enum: ["idle", "syncing", "failed", "success"], default: "idle" },
+    syncStatus: { type: String, enum: ["idle", "syncing", "failed", "success", "success_cached"], default: "idle" },
     error: { type: String },
     stats: {
       rating: { type: Number },
       globalRank: { type: Number },
       totalSolved: { type: Number },
       streak: { type: Number },
+      totalContributions: { type: Number },
+      totalRepos: { type: Number },
+      totalStars: { type: Number },
     },
   },
   { timestamps: true }

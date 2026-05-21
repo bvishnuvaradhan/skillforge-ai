@@ -5,6 +5,9 @@ const { requireAuth, hashToken } = require("../middleware/auth");
 const { SessionModel } = require("../models/Session");
 const { SettingModel } = require("../models/Setting");
 const { UserModel } = require("../models/User");
+const { CodingProfileModel } = require("../models/CodingProfile");
+const { performSync } = require("../services/sync.service");
+const { isRedisConnected, scrapingQueue } = require("../lib/queue");
 
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const AUTH_COOKIE_NAME = "sf_token";
@@ -131,9 +134,10 @@ router.get("/me", requireAuth, async (req, res) => {
 
 router.patch("/profile", requireAuth, async (req, res) => {
   const { fullName, targetRole, avatarUrl, goals, codingProfiles, theme } = req.body ?? {};
+  const userId = req.auth.payload.userId;
 
   const updatedUser = await UserModel.findByIdAndUpdate(
-    req.auth.payload.userId,
+    userId,
     {
       $set: {
         ...(typeof fullName === "string" ? { "profile.fullName": fullName } : {}),
@@ -150,11 +154,34 @@ router.patch("/profile", requireAuth, async (req, res) => {
         ...(typeof theme === "string" ? { "profile.theme": theme } : {}),
       },
     },
-    { returnDocument: "after" },
+    { returnDocument: "after" }
   );
 
   if (!updatedUser) {
     return res.status(404).json({ error: "User not found" });
+  }
+
+  // SYNC WITH CODING PROFILES: If usernames were changed in Settings, update/trigger sync
+  if (codingProfiles && typeof codingProfiles === "object") {
+    for (const [platform, username] of Object.entries(codingProfiles)) {
+      if (username) {
+        // Update CodingProfile doc
+        await CodingProfileModel.findOneAndUpdate(
+          { user: userId, platform },
+          { username, syncStatus: "idle" },
+          { upsert: true }
+        );
+        
+        // Trigger Sync (Direct if Redis offline)
+        if (isRedisConnected()) {
+          await scrapingQueue.add(`sync-${userId}-${platform}`, { userId, platform, username });
+        } else {
+          // Direct sync is slow, so we don't 'await' it here to keep settings responsive,
+          // but we trigger it in the background
+          performSync(userId, platform, username).catch(err => console.error("Settings direct sync failed:", err.message));
+        }
+      }
+    }
   }
 
   await syncSettings(updatedUser._id, updatedUser.profile);

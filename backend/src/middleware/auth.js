@@ -31,9 +31,12 @@ async function requireAuth(req, res, next) {
     session.lastUsedAt = new Date();
     await session.save();
 
+    // Compatibility layer: populate both req.auth and req.user
     req.auth = { token, payload, session };
+    req.user = { id: payload.userId, role: payload.role, email: payload.email };
+    
     return next();
-  } catch {
+  } catch (error) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 }

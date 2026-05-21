@@ -1,64 +1,94 @@
 const { graphql } = require("@octokit/graphql");
+const axios = require("axios");
+const cheerio = require("cheerio");
 const { env } = require("../config/env");
 
-const githubGraphql = graphql.defaults({
-  headers: {
-    authorization: `token ${env.GITHUB_TOKEN}`,
-  },
-});
-
 /**
- * Fetches GitHub user data including contributions, repositories, and languages.
+ * Fetches GitHub user data. Uses GraphQL if token is available, 
+ * otherwise falls back to a public profile scraper.
  */
 async function fetchGithubData(username) {
-  if (!env.GITHUB_TOKEN) {
-    throw new Error("GITHUB_TOKEN is not configured");
-  }
+  console.log(`[GitHubService] Starting fetch for: ${username} (Token present: ${!!env.GITHUB_TOKEN})`);
 
-  const query = `
-    query($username: String!) {
-      user(login: $username) {
-        contributionsCollection {
-          contributionCalendar {
-            totalContributions
-            weeks {
-              contributionDays {
-                contributionCount
-                date
+  if (env.GITHUB_TOKEN) {
+    try {
+      const githubGraphql = graphql.defaults({
+        headers: {
+          authorization: `token ${env.GITHUB_TOKEN}`,
+        },
+      });
+
+      const query = `
+        query($username: String!) {
+          user(login: $username) {
+            contributionsCollection {
+              contributionCalendar {
+                totalContributions
               }
             }
-          }
-          startedAt
-          endedAt
-        }
-        repositories(first: 50, orderBy: {field: STARGAZERS, direction: DESC}, privacy: PUBLIC) {
-          nodes {
-            name
-            url
-            stargazerCount
-            primaryLanguage {
-              name
-            }
-            defaultBranchRef {
-              target {
-                ... on Commit {
-                  history(first: 1) {
-                    totalCount
-                  }
+            repositories(first: 100, orderBy: {field: STARGAZERS, direction: DESC}, privacy: PUBLIC) {
+              totalCount
+              nodes {
+                name
+                url
+                stargazerCount
+                primaryLanguage {
+                  name
                 }
               }
             }
           }
         }
-      }
-    }
-  `;
+      `;
 
+      const data = await githubGraphql(query, { username });
+      console.log(`[GitHubService] GraphQL success for ${username}`);
+      return data.user;
+    } catch (error) {
+      console.warn(`[GitHubService] GraphQL failed for ${username}: ${error.message}`);
+      // Fall through to scraper
+    }
+  }
+
+  // FALLBACK: Public Profile Scraper
   try {
-    const data = await githubGraphql(query, { username });
-    return data.user;
+    console.log(`[GitHubService] Attempting Scraper Fallback for ${username}`);
+    const response = await axios.get(`https://github.com/${username}?tab=overview`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+      }
+    });
+
+    const $ = cheerio.load(response.data);
+    
+    // Improved scraper: Search multiple potential locations for contributions
+    let totalContributions = 0;
+    const contributionText = $(".js-yearly-contributions h2, .js-contribution-graph h2").first().text();
+    const match = contributionText.match(/([\d,]+)\s+contributions/i);
+    if (match) {
+      totalContributions = parseInt(match[1].replace(/,/g, ''));
+    }
+
+    // Extract repository count
+    const repoCountText = $("[data-tab-item='repositories'] .Counter, .UnderlineNav-item span.Counter").first().text();
+    const totalRepos = parseInt(repoCountText) || 0;
+
+    console.log(`[GitHubService] Scraper result for ${username}: ${totalContributions} contributions, ${totalRepos} repos`);
+
+    return {
+      contributionsCollection: {
+        contributionCalendar: {
+          totalContributions,
+          weeks: []
+        }
+      },
+      repositories: {
+        totalCount: totalRepos,
+        nodes: []
+      }
+    };
   } catch (error) {
-    console.error(`Error fetching GitHub data for ${username}:`, error.message);
+    console.error(`[GitHubService] All fetch methods failed for ${username}:`, error.message);
     throw error;
   }
 }
@@ -69,30 +99,22 @@ async function fetchGithubData(username) {
 function normalizeGithubData(raw) {
   const contributions = raw.contributionsCollection.contributionCalendar;
   
-  const repos = raw.repositories.nodes.map(repo => ({
+  const repos = (raw.repositories.nodes || []).map(repo => ({
     name: repo.name,
     url: repo.url,
     stars: repo.stargazerCount,
-    language: repo.primaryLanguage ? repo.primaryLanguage.name : 'Unknown',
-    contributionCount: repo.defaultBranchRef?.target?.history?.totalCount || 0
+    language: repo.primaryLanguage ? repo.primaryLanguage.name : 'Unknown'
   }));
 
-  const languageMap = {};
-  repos.forEach(repo => {
-    if (repo.language !== 'Unknown') {
-      languageMap[repo.language] = (languageMap[repo.language] || 0) + 1;
-    }
-  });
-
-  const topLanguages = Object.entries(languageMap)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const totalStars = repos.reduce((acc, repo) => acc + repo.stars, 0);
 
   return {
-    totalContributions: contributions.totalContributions,
+    totalContributions: contributions.totalContributions || 0,
+    totalRepos: raw.repositories.totalCount || 0,
+    totalStars: totalStars || 0,
     repos,
-    topLanguages,
-    contributionWeeks: contributions.weeks
+    topLanguages: [],
+    contributionWeeks: contributions.weeks || []
   };
 }
 

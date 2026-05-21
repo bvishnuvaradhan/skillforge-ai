@@ -12,7 +12,7 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, Tooltip as ChartTooltip
 } from "recharts";
-import { LuZap, LuActivity, LuBrainCircuit, LuRotateCcw, LuInfo, LuAlertTriangle, LuCheckCircle } from "react-icons/lu";
+import { LuZap, LuActivity, LuBrainCircuit, LuRotateCcw } from "react-icons/lu";
 
 export function DashboardScreen() {
   const router = useRouter();
@@ -110,7 +110,7 @@ export function DashboardScreen() {
               {insights.map((insight, i) => (
                 <Card key={i} className="min-w-[300px] border-l-4" style={{ borderColor: insight.severity === 'warning' ? '#fbbf24' : '#22d3ee' }}>
                   <div className="flex gap-3">
-                    {insight.severity === 'warning' ? <LuAlertTriangle className="text-yellow-400 shrink-0" /> : <LuInfo className="text-cyan-400 shrink-0" />}
+                    {insight.severity === 'warning' ? <LuActivity className="text-yellow-400 shrink-0" /> : <LuZap className="text-cyan-400 shrink-0" />}
                     <div>
                       <p className="text-xs opacity-50 uppercase tracking-tighter">{insight.topic || 'System'}</p>
                       <p className="text-sm font-medium">{insight.message}</p>
@@ -234,7 +234,7 @@ export function DashboardScreen() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-mono text-cyan-400">UDI_{sub.udi}</p>
-                    <LuCheckCircle size={12} className="ml-auto mt-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <LuZap size={12} className="ml-auto mt-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </motion.div>
               )) : (

@@ -2,6 +2,7 @@ const { SubmissionModel } = require("../models/Submission");
 const { TopicStatModel } = require("../models/TopicStat");
 const { AnalyticsSnapshotModel } = require("../models/AnalyticsSnapshot");
 const { SkillDecayModel } = require("../models/SkillDecay");
+const { CodingProfileModel } = require("../models/CodingProfile");
 
 /**
  * Main analytics service to process user data and generate insights.
@@ -50,8 +51,6 @@ async function calculateTopicMastery(userId, insights) {
   });
 
   for (const [topic, stats] of Object.entries(topicAgg)) {
-    // Mastery formula: (Average UDI / 10) * 100
-    // WEIGHTED: High UDI problems increase mastery faster
     const avgUDI = stats.totalUDI / stats.count;
     const masteryScore = Math.min(100, Math.round(avgUDI * 10));
     
@@ -71,7 +70,7 @@ async function calculateTopicMastery(userId, insights) {
         masteryScore,
         solvedCount: stats.solved,
         lastSolvedAt: new Date(),
-        stability: Math.max(10, stats.solved * 2) // Stability grows with solved count
+        stability: Math.max(10, stats.solved * 2)
       },
       { upsert: true }
     );
@@ -124,8 +123,6 @@ async function detectDNAPatterns(userId) {
 
   const retryCount = submissions.reduce((acc, s) => acc + (s.retries || 0), 0);
   const avgRetries = retryCount / submissions.length;
-
-  // Confidence based on sample size
   const confidence = Math.min(0.95, submissions.length / 50);
 
   let dnaType = "Consistent Learner";
@@ -140,16 +137,31 @@ async function detectDNAPatterns(userId) {
   );
 }
 
+/**
+ * Generates the daily snapshot by aggregating platform stats.
+ */
 async function generateDailySnapshot(userId, insights) {
-  const totalSolved = await SubmissionModel.countDocuments({ user: userId, status: 'accepted' });
+  // CORRECTED: Sum total solved from all linked platforms instead of just submissions count
+  const profiles = await CodingProfileModel.find({ user: userId });
+  const totalSolved = profiles.reduce((acc, p) => acc + (p.stats?.totalSolved || 0), 0);
+  
   const activeDays = (await SubmissionModel.distinct('solvedAt', { user: userId })).length;
+
+  // Calculate consistency based on active days in the last 30 days
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const recentActiveDays = (await SubmissionModel.distinct('solvedAt', { 
+    user: userId, 
+    solvedAt: { $gte: thirtyDaysAgo } 
+  })).length;
+  const consistencyScore = Math.min(100, Math.round((recentActiveDays / 20) * 100)); // Target 20 days/month
 
   await AnalyticsSnapshotModel.findOneAndUpdate(
     { user: userId, date: { $gte: new Date().setHours(0,0,0,0) } },
     {
       totalSolved,
+      consistencyScore,
       activeDays,
-      insights: insights.slice(0, 5), // Keep latest 5 insights
+      insights: insights.slice(0, 5),
       date: new Date(),
     },
     { upsert: true }

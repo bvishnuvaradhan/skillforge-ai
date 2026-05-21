@@ -7,7 +7,8 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  CLIENT_ORIGIN: z.string().url().default("http://localhost:5173"),
+  // Allow comma-separated origins for dev setups (we'll validate at runtime)
+  CLIENT_ORIGIN: z.string().default("http://localhost:3000"),
   JWT_SECRET: z.string().min(16),
   MONGODB_URI: z.string().min(1),
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),

@@ -19,33 +19,32 @@ async function request(path, options = {}) {
   return data;
 }
 
+// Generic API object for CRUD operations
+export const api = {
+  get: (path, options) => request(path, { ...options, method: "GET" }),
+  post: (path, body, options) => request(path, { ...options, method: "POST", body: JSON.stringify(body) }),
+  patch: (path, body, options) => request(path, { ...options, method: "PATCH", body: JSON.stringify(body) }),
+  put: (path, body, options) => request(path, { ...options, method: "PUT", body: JSON.stringify(body) }),
+  delete: (path, options) => request(path, { ...options, method: "DELETE" }),
+};
+
+// Legacy individual exports
 export function login(payload) {
-  return request("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return api.post("/auth/login", payload);
 }
 
 export function signup(payload) {
-  return request("/auth/signup", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  return api.post("/auth/signup", payload);
 }
 
 export function getMe() {
-  return request("/auth/me", {});
+  return api.get("/auth/me");
 }
 
 export function updateProfile(payload) {
-  return request("/auth/profile", {
-    method: "PATCH",
-    body: JSON.stringify(payload),
-  });
+  return api.patch("/auth/profile", payload);
 }
 
 export function logout() {
-  return request("/auth/logout", {
-    method: "POST",
-  });
+  return api.post("/auth/logout");
 }

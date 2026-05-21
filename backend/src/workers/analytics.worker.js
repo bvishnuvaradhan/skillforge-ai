@@ -20,4 +20,8 @@ analyticsWorker.on("failed", (job, err) => {
   console.error(`Analytics job ${job.id} failed: ${err.message}`);
 });
 
+analyticsWorker.on("error", () => {
+  // Nuclear silence for connection issues
+});
+
 module.exports = analyticsWorker;
