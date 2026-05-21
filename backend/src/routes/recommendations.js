@@ -5,13 +5,14 @@ const { RecommendationHistoryModel } = require("../models/RecommendationHistory"
 const { generateRecommendations } = require("../recommendation/detector");
 const { filterByCooldowm } = require("../recommendation/cooldown");
 const { formatExplanationForDisplay } = require("../explanation/basic");
+const { enrichRecommendationWithExplanation } = require("../services/explainability.service");
 const { z } = require("zod");
 
 const router = Router();
 
 /**
  * GET /api/recommendations
- * Get pending recommendations for current user, respecting cool-down
+ * Get pending recommendations for current user with deep explanations
  */
 router.get("/", requireAuth, async (req, res) => {
   try {
@@ -25,17 +26,25 @@ router.get("/", requireAuth, async (req, res) => {
     // Apply cool-down filter
     const filtered = await filterByCooldowm(recs);
 
-    // Add computed finalPriority and formatted explanations
-    const enriched = filtered.map(rec => {
-      const obj = rec.toObject();
+    // Enrich with deep explanations (confidence, evidence, caveats, alternatives)
+    const enriched = await Promise.all(
+      filtered.map(rec => enrichRecommendationWithExplanation(rec, req.user.id))
+    );
+
+    // Add computed finalPriority using confidence from deep explanation
+    const withPriority = enriched.map(rec => {
+      const finalPriority = rec.confidence && rec.confidence.score
+        ? (rec.urgencyScore * 0.5 + rec.impactScore * 0.3 + rec.confidence.score * 0.2) / 100
+        : (rec.urgencyScore * 0.5 + rec.impactScore * 0.3 + 50 * 0.2) / 100;
+
       return {
-        ...obj,
-        finalPriority: rec.getFinalPriority(50),
+        ...rec,
+        finalPriority: Math.min(95, Math.max(0, finalPriority)),
         display: formatExplanationForDisplay(rec, rec.evidence || {})
       };
     });
 
-    res.status(200).json({ recommendations: enriched });
+    res.status(200).json({ recommendations: withPriority });
   } catch (error) {
     console.error("[RecommendationRoute] GET / error:", error.message);
     res.status(500).json({ error: error.message });
