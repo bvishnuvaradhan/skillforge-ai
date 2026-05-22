@@ -2,6 +2,9 @@ const { Worker } = require("bullmq");
 const { connection } = require("../lib/queue");
 const { processUserAnalytics } = require("../services/analytics.service");
 const { generateRecommendations } = require("../recommendation/detector");
+const { computeDNAv2 } = require("../services/dna-v2");
+const { adaptRecommendationByDNA } = require("../recommendation/dna-adapter");
+const { DNAProfileModel } = require("../models/DNAProfile");
 
 const analyticsWorker = new Worker(
   "analytics",
@@ -12,19 +15,34 @@ const analyticsWorker = new Worker(
     // 1. Process analytics (mastery, decay, DNA)
     await processUserAnalytics(userId);
 
-    // 2. Generate recommendations based on new analytics
-    const recommendations = await generateRecommendations(userId);
+    // 2. Compute DNA v2
+    const dnaResult = await computeDNAv2(userId);
+    const dnaProfile = dnaResult?.profile;
+
+    // 3. Generate recommendations based on new analytics
+    let recommendations = await generateRecommendations(userId);
+
+    // 4. Adapt recommendations by DNA
+    if (dnaProfile) {
+      recommendations = await Promise.all(
+        recommendations.map(rec =>
+          adaptRecommendationByDNA(rec, dnaProfile.classification)
+        )
+      );
+    }
 
     return {
       analyticsProcessed: true,
-      recommendationsGenerated: recommendations.length
+      dnaComputed: !!dnaProfile,
+      recommendationsGenerated: recommendations.length,
+      recommendationsAdapted: !!dnaProfile
     };
   },
   { connection, concurrency: 2 }
 );
 
 analyticsWorker.on("completed", (job) => {
-  console.log(`Analytics job ${job.id} completed with ${job.returnvalue?.recommendationsGenerated || 0} recommendations`);
+  console.log(`Analytics job ${job.id} completed: ${job.returnvalue?.recommendationsGenerated || 0} recommendations`);
 });
 
 analyticsWorker.on("failed", (job, err) => {
@@ -36,3 +54,4 @@ analyticsWorker.on("error", () => {
 });
 
 module.exports = analyticsWorker;
+
