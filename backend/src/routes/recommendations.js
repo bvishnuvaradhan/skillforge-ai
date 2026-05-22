@@ -6,6 +6,7 @@ const { generateRecommendations } = require("../recommendation/detector");
 const { filterByCooldowm } = require("../recommendation/cooldown");
 const { formatExplanationForDisplay } = require("../explanation/basic");
 const { enrichRecommendationWithExplanation } = require("../services/explainability.service");
+const { updateHistoricalAccuracyAsync } = require("../services/feedback-learning.service");
 const { z } = require("zod");
 
 const router = Router();
@@ -100,6 +101,9 @@ router.post("/:id/accept", requireAuth, async (req, res) => {
       wasHelpful: true
     });
 
+    // Trigger feedback learning asynchronously (fire and forget)
+    updateHistoricalAccuracyAsync();
+
     res.status(200).json({ message: "Recommendation accepted", recommendation: rec });
   } catch (error) {
     console.error("[RecommendationRoute] POST /accept error:", error.message);
@@ -142,6 +146,9 @@ router.post("/:id/reject", requireAuth, async (req, res) => {
       wasHelpful: false
     });
 
+    // Trigger feedback learning asynchronously (fire and forget)
+    updateHistoricalAccuracyAsync();
+
     res.status(200).json({ message: "Recommendation rejected", recommendation: rec });
   } catch (error) {
     console.error("[RecommendationRoute] POST /reject error:", error.message);
@@ -180,6 +187,9 @@ router.post("/:id/complete", requireAuth, async (req, res) => {
       userAction: "completed",
       wasHelpful: true
     });
+
+    // Trigger feedback learning asynchronously (fire and forget)
+    updateHistoricalAccuracyAsync();
 
     res.status(200).json({ message: "Recommendation completed", recommendation: rec });
   } catch (error) {
