@@ -13,6 +13,7 @@ const { adminRouter } = require("./routes/admin");
 const { dnaRouter } = require("./routes/dna");
 const { decayRouter } = require("./routes/decay");
 const { dependenciesRouter } = require("./routes/dependencies");
+const { arbitrationRouter } = require("./routes/arbitration");
 const { initWorkers } = require("./workers");
 const { scrapingQueue, analyticsQueue } = require("./lib/queue");
 
@@ -71,6 +72,7 @@ app.use("/api/admin", adminRouter);
 app.use("/api/dna", dnaRouter);
 app.use("/api/decay", decayRouter);
 app.use("/api/dependencies", dependenciesRouter);
+app.use("/api/arbitration", arbitrationRouter);
 
 // NOTE: 404 handler will be registered after optional runtime mounts (e.g., Bull Board)
 

@@ -17,6 +17,20 @@ const recommendationPrioritySchema = new Schema(
       default: ["decay", "dependency", "dna"]
     },
 
+    urgencyScore: Number,
+    impactScore: Number,
+    confidenceScore: Number,
+    dependencyImportance: Number,
+    diversityAdjustment: Number,
+
+    cooldownPenalty: Number,
+    fatiguePenalty: Number,
+    stalePenalty: Number,
+
+    weightedBaseScore: Number,
+    finalPriorityScore: Number,
+    winnerReason: String,
+
     arbitrationMetadata: {
       reason: String,
       decayUrgency: Number,

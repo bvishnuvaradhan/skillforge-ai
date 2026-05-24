@@ -7,7 +7,7 @@ const { RULES } = require("./rules");
 const { buildExplanation } = require("../explanation/basic");
 const { suggestSmartExploration } = require("../services/dependency");
 const { adaptExplorationByDependencies } = require("./dependency-adapter");
-const { logRecommendationPriority } = require("./priority-arbitration-prep");
+const { orchestrateRecommendations } = require("../services/arbitration");
 
 const RECOMMENDATION_EXPIRY = {
   revision: 3,
@@ -131,8 +131,8 @@ async function generateRecommendations(userId) {
       };
     });
 
-    // 6. Save to database with expiration dates
-    const savedRecs = [];
+    // 6. Save all candidates first; arbitration will keep winners and stale others.
+    const savedCandidates = [];
     for (const rec of withExplanations) {
       const expiryDays = RECOMMENDATION_EXPIRY[rec.type] || 7;
       const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
@@ -142,18 +142,19 @@ async function generateRecommendations(userId) {
         ...rec,
         expiresAt
       });
-
-      await logRecommendationPriority(userId, saved, {
-        reason: hasDecayUrgent
-          ? "Decay urgency preserved over dependency exploration"
-          : "Conservative arbitration order"
-      });
-
-      savedRecs.push(saved);
+      savedCandidates.push(saved);
     }
 
-    console.log(`[RecommendationEngine] Generated ${savedRecs.length} recommendations for user ${userId}`);
-    return savedRecs;
+    const arbitration = await orchestrateRecommendations(userId, savedCandidates, { persist: true });
+    const winnerIds = arbitration.winners.map((r) => r._id);
+    const winners = await RecommendationModel.find({ _id: { $in: winnerIds } });
+
+    console.log(
+      `[RecommendationEngine] Generated ${savedCandidates.length} candidates; ` +
+      `${winners.length} governed winners for user ${userId}`
+    );
+
+    return winners;
   } catch (error) {
     console.error(`[RecommendationEngine] Failed to generate recommendations for ${userId}:`, error.message);
     throw error;

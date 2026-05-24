@@ -11,6 +11,13 @@ const {
   suggestSmartExploration,
   initializeDependencyGraph
 } = require("../services/dependency");
+const { orchestrateRecommendations } = require("../services/arbitration");
+const {
+  computeCandidateOrderHash,
+  buildWorkerIdempotencyKey,
+  findTraceByIdempotency,
+  isReplaySafeMatch
+} = require("../services/arbitration/telemetry");
 
 const analyticsWorker = new Worker(
   "analytics",
@@ -74,6 +81,39 @@ const analyticsWorker = new Worker(
         }
       }
 
+      // 7. Arbitration pass (non-persistent in worker response context)
+      let arbitration = null;
+      try {
+        const requestHash = computeCandidateOrderHash(recommendations);
+        const idempotencyKey = buildWorkerIdempotencyKey(userId, job.id, requestHash);
+        const previousTrace = await findTraceByIdempotency(userId, idempotencyKey);
+
+        if (isReplaySafeMatch(previousTrace, requestHash)) {
+          arbitration = {
+            winners: new Array(previousTrace.counts?.winners || 0).fill(null),
+            deferred: new Array(previousTrace.counts?.deferred || 0).fill(null),
+            trace: previousTrace,
+            replayed: true
+          };
+          console.log(`[Analytics] Replayed arbitration for user ${userId} (job ${job.id})`);
+        } else {
+          arbitration = await orchestrateRecommendations(userId, recommendations, {
+            persist: false,
+            persistTrace: true,
+            idempotencyKey,
+            requestHash,
+            eventMetadata: {
+              source: "worker",
+              trigger: "analytics_job",
+              replaySafe: true,
+              sequence: Number(job.attemptsMade || 0)
+            }
+          });
+        }
+      } catch (arbitrationError) {
+        console.warn(`[Analytics] Arbitration orchestration failed:`, arbitrationError.message);
+      }
+
       return {
         analyticsProcessed: true,
         dnaComputed: !!dnaProfile,
@@ -81,7 +121,9 @@ const analyticsWorker = new Worker(
         dependencyComputed: !!dependencyAssessment,
         recommendationsGenerated: recommendations.length,
         recommendationsAdapted: !!(dnaProfile || decayResult),
-        smartExplorationCount: smartExploration?.suggestions?.length || 0
+        smartExplorationCount: smartExploration?.suggestions?.length || 0,
+        arbitrationWinners: arbitration?.winners?.length || 0,
+        arbitrationReplayed: arbitration?.replayed === true
       };
     } catch (error) {
       console.error(`[Analytics] Job failed:`, error);

@@ -2,11 +2,13 @@ const { Router } = require("express");
 const { requireAuth } = require("../middleware/auth");
 const { RecommendationModel } = require("../models/Recommendation");
 const { RecommendationHistoryModel } = require("../models/RecommendationHistory");
+const { RecommendationLifecycleModel } = require("../models/RecommendationLifecycle");
 const { generateRecommendations } = require("../recommendation/detector");
 const { filterByCooldowm } = require("../recommendation/cooldown");
 const { formatExplanationForDisplay } = require("../explanation/basic");
 const { enrichRecommendationWithExplanation } = require("../services/explainability.service");
 const { updateHistoricalAccuracyAsync } = require("../services/feedback-learning.service");
+const { transitionLifecycle } = require("../services/arbitration/recommendation-lifecycle");
 const { z } = require("zod");
 
 const router = Router();
@@ -17,12 +19,18 @@ const router = Router();
  */
 router.get("/", requireAuth, async (req, res) => {
   try {
+    const active = await RecommendationLifecycleModel.find({
+      user: req.user.id,
+      state: "active"
+    }).sort({ updatedAt: -1 }).limit(10);
+
+    const activeIds = active.map((item) => item.recommendationId);
+
     const recs = await RecommendationModel.find({
       user: req.user.id,
+      _id: { $in: activeIds },
       status: "pending"
-    })
-      .sort({ urgencyScore: -1, impactScore: -1 })
-      .limit(10);
+    }).sort({ urgencyScore: -1, impactScore: -1 });
 
     // Apply cool-down filter
     const filtered = await filterByCooldowm(recs);
@@ -104,6 +112,12 @@ router.post("/:id/accept", requireAuth, async (req, res) => {
     // Trigger feedback learning asynchronously (fire and forget)
     updateHistoricalAccuracyAsync();
 
+    try {
+      await transitionLifecycle(rec._id, "resolved", "Recommendation accepted by user");
+    } catch (err) {
+      console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
+    }
+
     res.status(200).json({ message: "Recommendation accepted", recommendation: rec });
   } catch (error) {
     console.error("[RecommendationRoute] POST /accept error:", error.message);
@@ -149,6 +163,12 @@ router.post("/:id/reject", requireAuth, async (req, res) => {
     // Trigger feedback learning asynchronously (fire and forget)
     updateHistoricalAccuracyAsync();
 
+    try {
+      await transitionLifecycle(rec._id, "ignored", "Recommendation rejected by user");
+    } catch (err) {
+      console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
+    }
+
     res.status(200).json({ message: "Recommendation rejected", recommendation: rec });
   } catch (error) {
     console.error("[RecommendationRoute] POST /reject error:", error.message);
@@ -190,6 +210,12 @@ router.post("/:id/complete", requireAuth, async (req, res) => {
 
     // Trigger feedback learning asynchronously (fire and forget)
     updateHistoricalAccuracyAsync();
+
+    try {
+      await transitionLifecycle(rec._id, "resolved", "Recommendation completed by user");
+    } catch (err) {
+      console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
+    }
 
     res.status(200).json({ message: "Recommendation completed", recommendation: rec });
   } catch (error) {
