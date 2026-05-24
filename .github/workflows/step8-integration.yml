@@ -54,7 +54,7 @@ jobs:
         working-directory: backend
         env:
           REDIS_URL: redis://localhost:6379
-          MONGO_URL: mongodb://localhost:27017/skillforge_test
+          MONGODB_URI: mongodb://localhost:27017/skillforge_test
         run: |
           node test/step7-arbitration.test.js
           node test/step7-replay-safety.test.js
@@ -62,4 +62,6 @@ jobs:
           node test/step8-archival.test.js
           node test/step8-compaction.test.js
           node test/step8-event-idempotency.test.js
+          node test/step8-telemetry.test.js
+          node test/step8-e2e.test.js
           node test/step8-stability-governance.test.js
