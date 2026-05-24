@@ -1,5 +1,5 @@
 const { Worker } = require("bullmq");
-const { connection } = require("../lib/queue");
+const { connection, SKIP_QUEUES } = require("../lib/queue");
 const { processUserAnalytics } = require("../services/analytics.service");
 const { generateRecommendations } = require("../recommendation/detector");
 const { computeDNAv2 } = require("../services/dna-v2");
@@ -20,7 +20,15 @@ const {
 } = require("../services/arbitration/telemetry");
 const { emitEvent, EVENT_TYPES } = require("../services/events");
 
-const analyticsWorker = new Worker(
+let analyticsWorker;
+
+if (SKIP_QUEUES) {
+  analyticsWorker = {
+    on: () => {},
+    close: async () => {},
+  };
+} else {
+  analyticsWorker = new Worker(
   "analytics",
   async (job) => {
     const { userId } = job.data;
@@ -165,8 +173,9 @@ const analyticsWorker = new Worker(
       throw error;
     }
   },
-  { connection, concurrency: 2 }
-);
+    { connection, concurrency: 2 }
+  );
+}
 
 analyticsWorker.on("completed", (job) => {
   console.log(`Analytics job ${job.id} completed: ${job.returnvalue?.recommendationsGenerated || 0} recommendations`);

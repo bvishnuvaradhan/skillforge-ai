@@ -1,10 +1,10 @@
 // Explainability service - deep enrichment with confidence, evidence, caveats
 // Orchestrates confidence calculator, evidence builder, caveats, alternatives
 
-const { calculateConfidence, assessDataQuality, extractSignals, explainConfidence } = require("./confidence");
-const { buildEvidenceChain } = require("./evidence-builder");
-const { generateCaveats } = require("./caveats");
-const { generateAlternatives } = require("./alternatives");
+const { calculateConfidence, assessDataQuality, extractSignals, explainConfidence } = require("../explanation/confidence");
+const { buildEvidenceChain } = require("../explanation/evidence-builder");
+const { generateCaveats } = require("../explanation/caveats");
+const { generateAlternatives } = require("../explanation/alternatives");
 const { SubmissionModel } = require("../models/Submission");
 const { SkillDecayModel } = require("../models/SkillDecay");
 const { TopicStatModel } = require("../models/TopicStat");

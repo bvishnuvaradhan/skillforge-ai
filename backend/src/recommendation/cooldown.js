@@ -67,7 +67,7 @@ function calculateCooldownUntil(rec, currentTime = new Date()) {
 module.exports = {
   COOLDOWN_PERIODS,
   shouldShowRecommendation,
-  filterByCooldowm,
+  filterByCooldown,
   recordRecommendationShown,
   calculateCooldownUntil
 };
