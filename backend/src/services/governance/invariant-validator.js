@@ -33,6 +33,27 @@ function validatePolicyInvariants(policySet = []) {
     if (rules.length > 1) issues.push(`priority collision ${prio} -> ${rules.join(",")}`);
   });
 
+  // Category precedence sanity check: ensure critical categories outrank less-critical ones
+  // Define an expected descending category precedence (high -> low)
+  const CATEGORY_PRECEDENCE = ["integrity", "stability", "capacity", "diversity", "personalization", "experimental"];
+  const maxPriorityByCategory = {};
+  for (const p of policySet) {
+    const cat = p.category || "uncategorized";
+    maxPriorityByCategory[cat] = Math.max(maxPriorityByCategory[cat] || -Infinity, p.priority || -Infinity);
+  }
+  // Check that categories appearing in CATEGORY_PRECEDENCE follow the order by their max priority
+  for (let i = 0; i < CATEGORY_PRECEDENCE.length - 1; i++) {
+    const hi = CATEGORY_PRECEDENCE[i];
+    for (let j = i + 1; j < CATEGORY_PRECEDENCE.length; j++) {
+      const lo = CATEGORY_PRECEDENCE[j];
+      if (maxPriorityByCategory[hi] !== undefined && maxPriorityByCategory[lo] !== undefined) {
+        if (maxPriorityByCategory[hi] <= maxPriorityByCategory[lo]) {
+          issues.push(`category precedence violated: ${hi} (=${maxPriorityByCategory[hi]}) should exceed ${lo} (=${maxPriorityByCategory[lo]})`);
+        }
+      }
+    }
+  }
+
   return { valid: issues.length === 0, issues };
 }
 
