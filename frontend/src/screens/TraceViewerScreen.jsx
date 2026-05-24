@@ -24,6 +24,8 @@ export function TraceViewerScreen() {
   const [activeRunId, setActiveRunId] = useState("");
   const [runTrace, setRunTrace] = useState(null);
   const [lineage, setLineage] = useState(null);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [compactTimeline, setCompactTimeline] = useState(true);
   const [lineageRecommendationId, setLineageRecommendationId] = useState("");
 
   useEffect(() => {
@@ -139,6 +141,18 @@ export function TraceViewerScreen() {
                 <LuWorkflow className="text-cyan-400" />
                 Arbitration Summary
               </h3>
+              <div className="flex items-center gap-3 mb-4">
+                <label className="flex items-center gap-2 text-sm opacity-80">
+                  <input type="checkbox" checked={showTimeline} onChange={(e) => setShowTimeline(e.target.checked)} />
+                  Show Timeline
+                </label>
+                {showTimeline && (
+                  <label className="flex items-center gap-2 text-sm opacity-70">
+                    <input type="checkbox" checked={compactTimeline} onChange={(e) => setCompactTimeline(e.target.checked)} />
+                    Compact
+                  </label>
+                )}
+              </div>
               {activeTraceSummary ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <p><LuClock3 className="inline mr-2" />Latency: {activeTraceSummary.latencyMs} ms</p>
@@ -148,6 +162,19 @@ export function TraceViewerScreen() {
                 </div>
               ) : (
                 <p className="opacity-70">Select a run to inspect details.</p>
+              )}
+              {showTimeline && runTrace?.recommendationTraces && (
+                <div className="mt-4 border-t pt-4 space-y-2 text-sm max-h-48 overflow-y-auto">
+                  {(runTrace.recommendationTraces || []).slice(0, 50).map((t) => (
+                    <div key={t._id} className={`flex items-center justify-between ${compactTimeline ? 'py-1' : 'py-2'}`}>
+                      <div className="flex-1">
+                        <div className="font-medium">{t.stage} · {t.outcome}</div>
+                        {!compactTimeline && <div className="opacity-70 text-xs">{t.reason || 'no-reason'}</div>}
+                      </div>
+                      <div className="text-xs opacity-60 ml-4">{new Date(t.createdAt).toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
               )}
             </Card>
           </motion.div>
