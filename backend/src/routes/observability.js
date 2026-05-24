@@ -2,6 +2,7 @@ const { Router } = require("express");
 const { requireAuth } = require("../middleware/auth");
 const { getGovernanceEvents, getLineage } = require("../services/observability/trace-query");
 const { dryRunGovernance } = require("../services/governance/policy-engine");
+const { runTelemetryAggregation } = require("../services/observability/telemetry-aggregator");
 
 const router = Router();
 
@@ -42,6 +43,17 @@ router.post("/governance/dry-run", requireAuth, async (req, res) => {
     };
 
     const result = dryRunGovernance(candidates, context);
+    return res.status(200).json({ result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/metrics", requireAuth, async (req, res) => {
+  try {
+    const lookback = Number(req.query.lookbackDays || 7);
+    const dryRun = req.query.dryRun === "true";
+    const result = await runTelemetryAggregation({ lookbackDays: lookback, dryRun });
     return res.status(200).json({ result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
