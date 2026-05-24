@@ -43,6 +43,14 @@ const createSafeQueue = (name) => {
 
 const scrapingQueue = createSafeQueue("scraping");
 const analyticsQueue = createSafeQueue("analytics");
+let eventDlqQueue = null;
+
+const getEventDlqQueue = () => {
+  if (!eventDlqQueue) {
+    eventDlqQueue = createSafeQueue("event-dlq");
+  }
+  return eventDlqQueue;
+};
 
 // Helper to check status without throwing
 const isRedisConnected = () => connection.status === "ready";
@@ -51,5 +59,6 @@ module.exports = {
   connection,
   scrapingQueue,
   analyticsQueue,
+  getEventDlqQueue,
   isRedisConnected
 };

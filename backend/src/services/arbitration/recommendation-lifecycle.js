@@ -1,4 +1,6 @@
 const { RecommendationLifecycleModel } = require("../../models/RecommendationLifecycle");
+const { logLifecycleAudit } = require("../observability/trace-store");
+const { emitEvent, EVENT_TYPES } = require("../events");
 
 const ALLOWED_TRANSITIONS = {
   active: ["snoozed", "stale", "superseded", "resolved", "ignored"],
@@ -10,7 +12,8 @@ const ALLOWED_TRANSITIONS = {
 };
 
 async function upsertActiveLifecycle(userId, recommendation) {
-  return RecommendationLifecycleModel.findOneAndUpdate(
+  const prior = await RecommendationLifecycleModel.findOne({ user: userId, recommendationId: recommendation._id });
+  const updated = await RecommendationLifecycleModel.findOneAndUpdate(
     { user: userId, recommendationId: recommendation._id },
     {
       topic: recommendation.topic,
@@ -22,6 +25,36 @@ async function upsertActiveLifecycle(userId, recommendation) {
     },
     { upsert: true, new: true }
   );
+
+  await logLifecycleAudit({
+    userId,
+    recommendationId: recommendation._id,
+    topic: recommendation.topic,
+    fromState: prior?.state,
+    toState: "active",
+    reason: "Arbitration winner",
+    source: "arbitration"
+  });
+
+  emitEvent(
+    EVENT_TYPES.LifecycleChanged,
+    {
+      userId,
+      recommendationId: String(recommendation._id),
+      topic: recommendation.topic,
+      fromState: prior?.state,
+      toState: "active",
+      reason: "Arbitration winner"
+    },
+    {
+      source: "arbitration.lifecycle",
+      userId,
+      idempotencyKey: `lifecycle:${userId}:${recommendation._id}:active`,
+      sequence: Number(prior?.timesSurfaced || 0)
+    }
+  );
+
+  return updated;
 }
 
 async function transitionLifecycle(recommendationId, toState, reason, extras = {}) {
@@ -45,11 +78,48 @@ async function transitionLifecycle(recommendationId, toState, reason, extras = {
   if (toState === "resolved") patch.resolvedAt = new Date();
   if (toState === "ignored") patch.ignoredAt = new Date();
 
-  return RecommendationLifecycleModel.findOneAndUpdate({ recommendationId }, patch, { new: true });
+  const updated = await RecommendationLifecycleModel.findOneAndUpdate(
+    { recommendationId },
+    patch,
+    { new: true }
+  );
+
+  await logLifecycleAudit({
+    userId: updated.user,
+    recommendationId,
+    topic: updated.topic,
+    fromState: current.state,
+    toState,
+    reason,
+    source: "api"
+  });
+
+  emitEvent(
+    EVENT_TYPES.LifecycleChanged,
+    {
+      userId: String(updated.user),
+      recommendationId: String(recommendationId),
+      topic: updated.topic,
+      fromState: current.state,
+      toState,
+      reason
+    },
+    {
+      source: "api.lifecycle",
+      userId: String(updated.user),
+      idempotencyKey: `lifecycle:${updated.user}:${recommendationId}:${toState}`,
+      sequence: Number(updated.interactionCount || 0)
+    }
+  );
+
+  return updated;
 }
 
 async function markStaleForDeferred(userId, deferredRecs) {
-  const ids = deferredRecs.map((r) => r._id).filter(Boolean);
+  const candidates = deferredRecs
+    .map((r) => ({ id: r._id, topic: r.topic, reason: r.deferredReason }))
+    .filter((item) => item.id);
+  const ids = candidates.map((item) => item.id);
   if (!ids.length) return;
 
   await RecommendationLifecycleModel.updateMany(
@@ -60,6 +130,36 @@ async function markStaleForDeferred(userId, deferredRecs) {
       staleDetectedAt: new Date()
     }
   );
+
+  for (const candidate of candidates) {
+    await logLifecycleAudit({
+      userId,
+      recommendationId: candidate.id,
+      topic: candidate.topic,
+      fromState: "active",
+      toState: "stale",
+      reason: candidate.reason || "Deferred by arbitration",
+      source: "arbitration"
+    });
+
+    emitEvent(
+      EVENT_TYPES.LifecycleChanged,
+      {
+        userId: String(userId),
+        recommendationId: String(candidate.id),
+        topic: candidate.topic,
+        fromState: "active",
+        toState: "stale",
+        reason: candidate.reason || "Deferred by arbitration"
+      },
+      {
+        source: "arbitration.lifecycle",
+        userId: String(userId),
+        idempotencyKey: `lifecycle:${userId}:${candidate.id}:stale`,
+        sequence: 1
+      }
+    );
+  }
 }
 
 module.exports = {

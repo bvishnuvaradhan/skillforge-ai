@@ -7,12 +7,14 @@ const {
   markStaleForDeferred
 } = require("./recommendation-lifecycle");
 const { generateDailyFocus } = require("./daily-focus-generator");
+const { stabilizeRecommendationSet } = require("../stability/stability-guard");
 const {
   createRunContext,
   markStage,
   buildTracePayload,
   persistTrace
 } = require("./telemetry");
+const { persistObservabilityArtifacts } = require("../observability/trace-store");
 const { RecommendationModel } = require("../../models/Recommendation");
 
 async function orchestrateRecommendations(userId, candidates, options = {}) {
@@ -45,11 +47,18 @@ async function orchestrateRecommendations(userId, candidates, options = {}) {
   markStage(runContext, "governEnd");
 
   const deferred = [...conflictDeferred, ...governanceDeferred];
+  const stabilized = await stabilizeRecommendationSet(userId, selected, deferred, {
+    maxDaily: 3,
+    churnThreshold: 80,
+    stickinessHours: 24
+  });
+  const stabilizedSelected = stabilized.selected;
+  const stabilizedDeferred = stabilized.deferred;
   let lifecycleTransitions = 0;
 
   if (persist) {
-    const winnerIds = selected.map((r) => r._id).filter(Boolean);
-    const deferredIds = deferred.map((r) => r._id).filter(Boolean);
+    const winnerIds = stabilizedSelected.map((r) => r._id).filter(Boolean);
+    const deferredIds = stabilizedDeferred.map((r) => r._id).filter(Boolean);
 
     if (winnerIds.length) {
       await RecommendationModel.updateMany(
@@ -57,7 +66,7 @@ async function orchestrateRecommendations(userId, candidates, options = {}) {
         { status: "pending", staleReason: null, staleDetectedAt: null }
       );
 
-      for (const winner of selected) {
+      for (const winner of stabilizedSelected) {
         await upsertActiveLifecycle(userId, winner);
         lifecycleTransitions += 1;
       }
@@ -72,29 +81,47 @@ async function orchestrateRecommendations(userId, candidates, options = {}) {
           staleDetectedAt: new Date()
         }
       );
-      await markStaleForDeferred(userId, deferred);
+      await markStaleForDeferred(userId, stabilizedDeferred);
       lifecycleTransitions += deferredIds.length;
     }
   }
   markStage(runContext, "lifecycleEnd");
 
-  const dailyFocus = await generateDailyFocus(userId, selected, {
+  const dailyFocus = await generateDailyFocus(userId, stabilizedSelected, {
     persist,
-    deferred
+    deferred: stabilizedDeferred
   });
   markStage(runContext, "focusEnd");
 
   const tracePayload = buildTracePayload(runContext, {
     normalized,
+    scored,
     normalizedCount: normalized.length,
     failures,
-    winners: selected,
-    deferred,
+    winners: stabilizedSelected,
+    deferred: stabilizedDeferred,
     conflicts,
-    lifecycleTransitions
+    lifecycleTransitions,
+    stabilityMetrics: stabilized.metrics
   });
 
   const persistedTrace = await persistTrace(tracePayload, { persist: persistTraceEnabled });
+
+  if (persistTraceEnabled) {
+    await persistObservabilityArtifacts(
+      tracePayload,
+      {
+        scored,
+        winners: stabilizedSelected,
+        deferred: stabilizedDeferred,
+        failures
+      },
+      {
+        persist: true,
+        arbitrationTraceId: persistedTrace?._id
+      }
+    );
+  }
 
   console.log(
     `[ARBITRATION_TRACE] run=${tracePayload.runId} user=${userId} ` +
@@ -103,8 +130,8 @@ async function orchestrateRecommendations(userId, candidates, options = {}) {
   );
 
   return {
-    winners: selected,
-    deferred,
+    winners: stabilizedSelected,
+    deferred: stabilizedDeferred,
     conflicts,
     failures,
     dailyFocus,

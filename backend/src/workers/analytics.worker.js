@@ -18,6 +18,7 @@ const {
   findTraceByIdempotency,
   isReplaySafeMatch
 } = require("../services/arbitration/telemetry");
+const { emitEvent, EVENT_TYPES } = require("../services/events");
 
 const analyticsWorker = new Worker(
   "analytics",
@@ -26,6 +27,12 @@ const analyticsWorker = new Worker(
     console.log(`Processing analytics job for user: ${userId}`);
 
     try {
+      emitEvent(
+        EVENT_TYPES.SubmissionAdded,
+        { userId, jobId: job.id },
+        { source: "analytics.worker", userId, sequence: Number(job.attemptsMade || 0) }
+      );
+
       // 1. Process analytics (mastery, decay, DNA)
       await processUserAnalytics(userId);
 
@@ -75,6 +82,11 @@ const analyticsWorker = new Worker(
       if (decayResult) {
         try {
           recommendations = await updateDecayRecommendations(userId, recommendations);
+          emitEvent(
+            EVENT_TYPES.DecayUpdated,
+            { userId, topics: Object.keys(decayResult?.profiles || {}) },
+            { source: "analytics.worker", userId, sequence: Number(job.attemptsMade || 0) }
+          );
           console.log(`[Analytics] Adapted ${recommendations.length} recommendations with decay context`);
         } catch (decayAdaptError) {
           console.warn(`[Analytics] Decay adaptation failed:`, decayAdaptError.message);
@@ -84,6 +96,12 @@ const analyticsWorker = new Worker(
       // 7. Arbitration pass (non-persistent in worker response context)
       let arbitration = null;
       try {
+        emitEvent(
+          EVENT_TYPES.RecommendationGenerated,
+          { userId, recommendationCount: recommendations.length },
+          { source: "analytics.worker", userId, sequence: Number(job.attemptsMade || 0) }
+        );
+
         const requestHash = computeCandidateOrderHash(recommendations);
         const idempotencyKey = buildWorkerIdempotencyKey(userId, job.id, requestHash);
         const previousTrace = await findTraceByIdempotency(userId, idempotencyKey);
@@ -109,6 +127,23 @@ const analyticsWorker = new Worker(
               sequence: Number(job.attemptsMade || 0)
             }
           });
+
+          emitEvent(
+            EVENT_TYPES.ArbitrationCompleted,
+            {
+              userId,
+              runId: arbitration?.trace?.runId,
+              winners: arbitration?.winners?.length || 0,
+              deferred: arbitration?.deferred?.length || 0
+            },
+            {
+              source: "analytics.worker",
+              userId,
+              runId: arbitration?.trace?.runId,
+              idempotencyKey,
+              sequence: Number(job.attemptsMade || 0)
+            }
+          );
         }
       } catch (arbitrationError) {
         console.warn(`[Analytics] Arbitration orchestration failed:`, arbitrationError.message);

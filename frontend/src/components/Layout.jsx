@@ -12,7 +12,8 @@ import { useUiStore } from "../store/uiStore";
 export function Layout({ children }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const pathname = usePathname();
-  const showWorkspaceShell = ["/dashboard", "/settings"].includes(pathname ?? "");
+  const showWorkspaceShell =
+    (pathname || "").startsWith("/dashboard") || (pathname || "").startsWith("/settings");
   const mobileNavOpen = useUiStore((state) => state.mobileNavOpen);
   const toggleMobileNav = useUiStore((state) => state.toggleMobileNav);
   const closeMobileNav = useUiStore((state) => state.closeMobileNav);

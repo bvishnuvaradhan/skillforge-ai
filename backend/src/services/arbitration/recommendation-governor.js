@@ -1,4 +1,5 @@
 const { RecommendationLifecycleModel } = require("../../models/RecommendationLifecycle");
+const { evaluateCandidateWithPolicies } = require("../governance/policy-engine");
 
 function categoryOf(rec) {
   if (["revision", "weak-topic", "difficulty-decrease"].includes(rec.type)) return "maintenance";
@@ -32,23 +33,24 @@ async function governRecommendations(candidates, options = {}) {
 
   for (const rec of sorted) {
     const category = categoryOf(rec);
-    const isCritical = rec.hardFlags?.criticalDecay === true;
+    const policyDecision = evaluateCandidateWithPolicies(rec, {
+      cooldownTopics,
+      selectedCount: selected.length,
+      maxDaily,
+      shouldPreserveDiversity: categoryUsed.has(category) && selected.length < 2,
+      policyOverrides: options.policyOverrides
+    });
 
-    if (cooldownTopics.has(rec.topic) && !isCritical) {
-      deferred.push({ ...rec, deferredReason: "Deferred by topic cooldown" });
-      continue;
-    }
-
-    if (selected.length >= maxDaily) {
-      deferred.push({ ...rec, deferredReason: "Deferred by daily recommendation cap" });
-      continue;
-    }
-
-    if (!categoryUsed.has(category) || selected.length >= 2) {
+    if (policyDecision.decision === "allow") {
       selected.push(rec);
       categoryUsed.add(category);
     } else {
-      deferred.push({ ...rec, deferredReason: "Deferred to preserve diversity balance" });
+      deferred.push({
+        ...rec,
+        deferredReason: policyDecision.reason,
+        deferredByRule: policyDecision.rule,
+        governancePolicyOrder: policyDecision.policyOrder
+      });
     }
   }
 

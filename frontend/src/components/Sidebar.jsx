@@ -6,6 +6,8 @@ import { useAuth } from "../context/useAuth";
 
 const LINKS = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/dashboard/traces", label: "Trace Viewer" },
+  { to: "/dashboard/tracking", label: "Tracking" },
   { to: "/settings", label: "Settings" },
   { to: "/", label: "Landing" },
 ];

@@ -123,6 +123,10 @@ function buildTracePayload(context, results) {
       cooldownBlocks,
       governanceConflicts: conflicts.length,
       lifecycleTransitions: results.lifecycleTransitions || 0,
+      churnRate: Number(results.stabilityMetrics?.churnRate || 0),
+      retainedRecommendations: Number(results.stabilityMetrics?.retained || 0),
+      addedRecommendations: Number(results.stabilityMetrics?.added || 0),
+      removedRecommendations: Number(results.stabilityMetrics?.removed || 0),
       winnerDistributionByType: countBy(winners, (item) => item.type),
       winnerDistributionByEngine: countBy(winners, (item) => item.sourceEngine)
     },

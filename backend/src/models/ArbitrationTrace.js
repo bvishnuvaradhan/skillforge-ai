@@ -28,6 +28,10 @@ const arbitrationTraceSchema = new Schema(
       cooldownBlocks: { type: Number, default: 0 },
       governanceConflicts: { type: Number, default: 0 },
       lifecycleTransitions: { type: Number, default: 0 },
+      churnRate: { type: Number, default: 0 },
+      retainedRecommendations: { type: Number, default: 0 },
+      addedRecommendations: { type: Number, default: 0 },
+      removedRecommendations: { type: Number, default: 0 },
       winnerDistributionByType: {
         type: Map,
         of: Number,
