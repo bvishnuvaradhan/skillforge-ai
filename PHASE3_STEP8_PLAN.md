@@ -231,7 +231,7 @@ Prevent observability + arbitration explosion.
 
 ### ✅ Build — Features
 - [x] Trace retention tiers
-- [ ] Archival jobs
+- [x] Archival jobs
 - [ ] Telemetry aggregation
 - [x] Sampling for non-critical traces
 - [ ] Trace compaction
@@ -248,7 +248,7 @@ Prevent observability + arbitration explosion.
 - [ ] Replay latency
 
 ### ✅ Exit Criteria
-- [ ] Retention/archival controls storage growth
+- [x] Retention/archival controls storage growth (archival job added, dry-run supported)
 - [ ] Slow-trace alerts and profiling available
 - [ ] Throughput and replay latency visible in dashboards
 
