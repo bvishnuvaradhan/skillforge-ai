@@ -15,7 +15,7 @@ async function run() {
 
   // create some candidates
   const candidates = [0, 1, 2].map((i) => ({
-    _id: Types.ObjectId(),
+    _id: new Types.ObjectId(),
     user: user._id,
     topic: i === 0 ? "Graphs" : i === 1 ? "DP" : "Arrays",
     type: "revision",
