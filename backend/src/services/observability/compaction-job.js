@@ -1,4 +1,5 @@
 const { RecommendationTraceModel } = require("../../models/RecommendationTrace");
+const { CompactionSummaryModel } = require("../../models/CompactionSummary");
 const { env } = require("../../config/env");
 
 /**
@@ -33,8 +34,16 @@ async function runCompaction({ olderThanDays = Number(env.COMPACTION_OLDER_THAN_
       return { dryRun: true, cutoff, summary };
     }
 
-    // In a real non-dry-run we might store summary documents and delete originals.
-    // For now, delete originals older than cutoff and return counts.
+    // Persist compaction summary documents and delete originals older than cutoff
+    try {
+      const docs = (summary || []).map((s) => ({ topic: s.topic, outcome: s.outcome, count: s.count, cutoff }));
+      if (docs.length) {
+        await CompactionSummaryModel.insertMany(docs, { ordered: false });
+      }
+    } catch (err) {
+      console.warn("[compaction-job] failed to persist summaries:", err && err.message);
+    }
+
     const res = await RecommendationTraceModel.deleteMany({ createdAt: { $lt: cutoff } });
     return { dryRun: false, cutoff, deleted: res.deletedCount || res.n || 0, summary };
   } catch (err) {

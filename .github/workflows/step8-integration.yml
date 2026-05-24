@@ -1,0 +1,65 @@
+name: Step8 Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval \"db.adminCommand('ping')\"" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend deps
+        working-directory: backend
+        run: |
+          npm ci
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for Mongo/Redis to be ready..."
+          for i in {1..20}; do
+            nc -z localhost 27017 && nc -z localhost 6379 && echo ok && break || sleep 3
+          done
+
+      - name: Run policy invariant validator
+        working-directory: backend
+        env:
+          NODE_ENV: test
+        run: |
+          node tools/validate-policies.js
+
+      - name: Run Step7 + Step8 integration tests
+        working-directory: backend
+        env:
+          REDIS_URL: redis://localhost:6379
+          MONGO_URL: mongodb://localhost:27017/skillforge_test
+        run: |
+          node test/step7-arbitration.test.js
+          node test/step7-replay-safety.test.js
+          node test/step8-foundations.test.js
+          node test/step8-archival.test.js
+          node test/step8-compaction.test.js
+          node test/step8-event-idempotency.test.js
+          node test/step8-stability-governance.test.js
