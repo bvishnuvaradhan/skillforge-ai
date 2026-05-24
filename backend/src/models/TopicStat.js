@@ -5,6 +5,9 @@ const topicStatSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     topic: { type: String, required: true }, // e.g., "Graphs", "DP", "Arrays"
     masteryScore: { type: Number, default: 0, min: 0, max: 100 },
+    directMasteryScore: { type: Number, default: 0, min: 0, max: 100 },
+    propagatedMasteryScore: { type: Number, default: 0, min: 0, max: 100 },
+    propagationSources: [{ type: String }],
     solvedCount: { type: Number, default: 0 },
     difficultyDistribution: {
       easy: { type: Number, default: 0 },

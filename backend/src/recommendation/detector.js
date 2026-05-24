@@ -5,6 +5,9 @@ const { AnalyticsSnapshotModel } = require("../models/AnalyticsSnapshot");
 const { RecommendationModel } = require("../models/Recommendation");
 const { RULES } = require("./rules");
 const { buildExplanation } = require("../explanation/basic");
+const { suggestSmartExploration } = require("../services/dependency");
+const { adaptExplorationByDependencies } = require("./dependency-adapter");
+const { logRecommendationPriority } = require("./priority-arbitration-prep");
 
 const RECOMMENDATION_EXPIRY = {
   revision: 3,
@@ -77,36 +80,45 @@ async function generateRecommendations(userId) {
       }
     }
 
-    // 3. EXPLORATION recommendation (dependency-aware, but for now suggest next topic)
+    // 3. EXPLORATION recommendation (dependency-aware)
     if (RULES.EXPLORATION.condition(snapshot, topicStats)) {
-      // Get topics not yet explored or barely explored
-      const exploredTopics = new Set(topicStats.map(t => t.topic));
-      const allCommonTopics = [
-        "Arrays", "Strings", "Linked Lists", "Stacks", "Queues",
-        "Trees", "Graphs", "Heaps", "Hash Tables", "Dynamic Programming",
-        "Greedy", "Divide & Conquer", "Backtracking", "BIT", "Recursion"
-      ];
+      const smart = await suggestSmartExploration(userId, { limit: 3 });
+      const candidates = smart?.suggestions || [];
 
-      const candidates = allCommonTopics.filter(t => !exploredTopics.has(t));
-
-      if (candidates.length > 0) {
-        // For now: pick first candidate (dependencies will be added in Step 6)
-        const candidateTopic = candidates[0];
+      for (const candidate of candidates) {
         const rec = RULES.EXPLORATION.generate(
-          { topic: candidateTopic, suggestedUDI: 4, prerequisites: [], strength: 0.8 },
+          {
+            topic: candidate.topic,
+            suggestedUDI: candidate.readinessBand === "MASTERED" ? 6 : candidate.readinessBand === "READY" ? 5 : 4,
+            prerequisites: (candidate.prerequisites || []).map((p) => p.topic),
+            strength: (candidate.readinessInternal || 50) / 100
+          },
           topicStats.length
         );
-        rec.reason = `You've mastered ${topicStats.length} topics. Time to explore ${candidateTopic}.`;
+
+        rec.reason = candidate.reason || `Common successful next step: ${candidate.topic}`;
         rec.metrics.consistency = snapshot?.consistencyScore || 0;
-        recommendations.push(rec);
+
+        const adapted = await adaptExplorationByDependencies(rec, userId);
+        recommendations.push(adapted);
       }
     }
 
     // 4. Deduplicate by (type + topic)
     const deduplicated = deduplicateRecommendations(recommendations);
 
+    // Conservative priority guardrail: decay-related urgency should stay above exploration
+    const hasDecayUrgent = deduplicated.some((r) => r.type === "revision" || r.type === "weak-topic");
+    const prioritized = hasDecayUrgent
+      ? deduplicated.map((r) =>
+          r.type === "exploration"
+            ? { ...r, urgencyScore: Math.min(r.urgencyScore || 30, 25) }
+            : r
+        )
+      : deduplicated;
+
     // 5. Add explanations to each recommendation
-    const withExplanations = deduplicated.map(rec => {
+    const withExplanations = prioritized.map(rec => {
       const explanation = buildExplanation(rec, rec.metrics);
       return {
         ...rec,
@@ -129,6 +141,12 @@ async function generateRecommendations(userId) {
         user: userId,
         ...rec,
         expiresAt
+      });
+
+      await logRecommendationPriority(userId, saved, {
+        reason: hasDecayUrgent
+          ? "Decay urgency preserved over dependency exploration"
+          : "Conservative arbitration order"
       });
 
       savedRecs.push(saved);

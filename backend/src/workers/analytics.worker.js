@@ -6,6 +6,11 @@ const { computeDNAv2 } = require("../services/dna-v2");
 const { adaptRecommendationByDNA } = require("../recommendation/dna-adapter");
 const { computeDecayV2, updateDecayRecommendations } = require("../services/decay-v2");
 const { DNAProfileModel } = require("../models/DNAProfile");
+const {
+  computeDependencies,
+  suggestSmartExploration,
+  initializeDependencyGraph
+} = require("../services/dependency");
 
 const analyticsWorker = new Worker(
   "analytics",
@@ -33,6 +38,23 @@ const analyticsWorker = new Worker(
       // 4. Generate recommendations based on new analytics
       let recommendations = await generateRecommendations(userId);
 
+      // 4b. Ensure static dependency graph exists
+      try {
+        await initializeDependencyGraph({ reason: "analytics-worker bootstrap" });
+      } catch (graphError) {
+        console.warn(`[Analytics] Dependency graph init skipped:`, graphError.message);
+      }
+
+      // 4c. Compute dependency assessment and smart exploration context
+      let dependencyAssessment = null;
+      let smartExploration = null;
+      try {
+        dependencyAssessment = await computeDependencies(userId);
+        smartExploration = await suggestSmartExploration(userId, { limit: 5 });
+      } catch (dependencyError) {
+        console.warn(`[Analytics] Dependency computation failed:`, dependencyError.message);
+      }
+
       // 5. Adapt recommendations by DNA
       if (dnaProfile) {
         recommendations = await Promise.all(
@@ -56,8 +78,10 @@ const analyticsWorker = new Worker(
         analyticsProcessed: true,
         dnaComputed: !!dnaProfile,
         decayComputed: !!decayResult,
+        dependencyComputed: !!dependencyAssessment,
         recommendationsGenerated: recommendations.length,
-        recommendationsAdapted: !!(dnaProfile || decayResult)
+        recommendationsAdapted: !!(dnaProfile || decayResult),
+        smartExplorationCount: smartExploration?.suggestions?.length || 0
       };
     } catch (error) {
       console.error(`[Analytics] Job failed:`, error);
