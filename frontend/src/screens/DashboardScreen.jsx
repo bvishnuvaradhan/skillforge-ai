@@ -247,8 +247,39 @@ export function DashboardScreen() {
 
       {/* BOTTOM LAYER — Long-Term Context */}
       <div className="space-y-6">
-        <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Recent Activity</h2>
+        <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Explore Your Intelligence</h2>
 
+        {/* Quick Links to Analysis Pages */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card
+            className="p-4 cursor-pointer hover:border-cyan-500/50 transition-all group"
+            onClick={() => router.push('/dashboard/skill-dna')}
+          >
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Explore</p>
+            <p className="font-semibold text-sm group-hover:text-cyan-400 transition-colors">Your Skill DNA</p>
+            <p className="text-xs opacity-60 mt-2">Behavioral patterns & learning style</p>
+          </Card>
+
+          <Card
+            className="p-4 cursor-pointer hover:border-purple-500/50 transition-all group"
+            onClick={() => router.push('/dashboard/learning-journey')}
+          >
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Plan</p>
+            <p className="font-semibold text-sm group-hover:text-purple-400 transition-colors">Learning Roadmap</p>
+            <p className="text-xs opacity-60 mt-2">Topics, prerequisites & milestones</p>
+          </Card>
+
+          <Card
+            className="p-4 cursor-pointer hover:border-emerald-500/50 transition-all group"
+            onClick={() => router.push('/dashboard/analytics')}
+          >
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Analyze</p>
+            <p className="font-semibold text-sm group-hover:text-emerald-400 transition-colors">Growth Analytics</p>
+            <p className="text-xs opacity-60 mt-2">Forecasts, trends & health</p>
+          </Card>
+        </motion.div>
+
+        {/* Recent Activity */}
         <motion.div variants={itemVariants}>
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
