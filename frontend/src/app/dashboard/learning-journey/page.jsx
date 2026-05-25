@@ -76,23 +76,29 @@ export function LearningJourneyPage({ onBack }) {
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Roadmap - takes 2 columns on large screens */}
-        <div className="lg:col-span-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          className="lg:col-span-2"
+        >
           <LearningRoadmap
             topics={mockTopics}
             recommendedPath={recommendedPath}
           />
-        </div>
+        </motion.div>
 
         {/* Side Panel - Statistics */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
           className="space-y-4"
         >
-          <Card className="p-6 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5">
+          <Card depth="level2" className="p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-400/10 rounded-full blur-2xl -z-1" />
             <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Journey Stats</p>
-            <div className="space-y-3">
+            <div className="space-y-3 relative z-10">
               <div>
                 <p className="text-sm opacity-70">Topics Mastered</p>
                 <p className="text-3xl font-bold text-emerald-400">2</p>
@@ -108,12 +114,13 @@ export function LearningJourneyPage({ onBack }) {
             </div>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5">
+          <Card depth="level2" className="p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-400/10 rounded-full blur-2xl -z-1" />
             <p className="text-xs opacity-50 uppercase tracking-wider mb-3">Recommended Next</p>
-            <div className="space-y-2">
+            <div className="space-y-2 relative z-10">
               <div>
                 <p className="text-sm font-semibold">Dynamic Programming</p>
-                <p className="text-xs opacity-60 mt-1">Ready in 3-5 days</p>
+                <p className="text-xs opacity-60 mt-1">You're ready for this—challenge awaits</p>
               </div>
               <Button variant="secondary" className="w-full text-xs">
                 Start Learning
@@ -124,16 +131,32 @@ export function LearningJourneyPage({ onBack }) {
       </div>
 
       {/* Visual Analytics Section */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.2 }}
+      >
         <h2 className="text-2xl font-semibold mb-6">Your Growth Analytics</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ForecastChart title="Mastery Forecast" timeframe="30 days" />
-          <ConsistencyGraph title="Weekly Activity" />
+          <Card depth="level2" className="p-6">
+            <ForecastChart title="Mastery Forecast" timeframe="30 days" />
+          </Card>
+          <Card depth="level2" className="p-6">
+            <ConsistencyGraph title="Weekly Activity" />
+          </Card>
         </div>
-      </div>
+      </motion.div>
 
       {/* Decay Analysis */}
-      <DecayVisualization topics={mockTopics} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+      >
+        <Card depth="level2" className="p-6">
+          <DecayVisualization topics={mockTopics} />
+        </Card>
+      </motion.div>
     </motion.section>
   );
 }

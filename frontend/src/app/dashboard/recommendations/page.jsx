@@ -148,22 +148,27 @@ export function RecommendationsPage({ onBack }) {
       </div>
 
       {/* Layout: Cards on left, details on right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.1 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Recommendation List */}
-        <div className="space-y-3">
+        <motion.div className="space-y-3">
           {filteredRecs.map((rec, idx) => (
             <motion.div
               key={rec.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05 }}
+              transition={{ type: 'spring', stiffness: 100, damping: 20, delay: idx * 0.05 }}
               onClick={() => { setSelectedRec(idx); setShowTrace(false); }}
               className={`cursor-pointer transition-all ${
                 selectedRec === idx ? 'ring-2 ring-cyan-400' : ''
               }`}
             >
-              <Card className={`p-4 cursor-pointer hover:bg-white/10 transition-colors ${
-                selectedRec === idx ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-white/5'
+              <Card depth={selectedRec === idx ? "level2" : "level1"} className={`p-4 cursor-pointer transition-all ${
+                selectedRec === idx ? 'bg-cyan-500/20 border-cyan-500/50' : 'hover:border-white/20'
               }`}>
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1">
@@ -178,35 +183,47 @@ export function RecommendationsPage({ onBack }) {
               </Card>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Details Panel */}
-        <div className="lg:col-span-2 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
+          className="lg:col-span-2 space-y-6"
+        >
           {/* Explain on Change */}
           {previousRec && (
-            <ExplainOnChange
-              currentRec={currentRec}
-              previousRec={previousRec}
-              explanation={currentRec.explanation}
-            />
+            <Card depth="level2" className="p-4 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-400/10 rounded-full blur-xl -z-1" />
+              <ExplainOnChange
+                currentRec={currentRec}
+                previousRec={previousRec}
+                explanation={currentRec.explanation}
+              />
+            </Card>
           )}
 
           {/* Recommendation Card - Large View */}
-          <RecommendationCard rec={currentRec} />
+          <Card depth="level2" className="p-4 relative overflow-hidden">
+            <RecommendationCard rec={currentRec} />
+          </Card>
 
           {/* Explainability Details */}
-          <RecommendationExplainability
-            recommendation={currentRec}
-            evidence={currentRec.evidence}
-            confidence={currentRec.confidence}
-            triggers={currentRec.triggers}
-          />
+          <Card depth="level2" className="p-6">
+            <RecommendationExplainability
+              recommendation={currentRec}
+              evidence={currentRec.evidence}
+              confidence={currentRec.confidence}
+              triggers={currentRec.triggers}
+            />
+          </Card>
 
           {/* Stability Indicator */}
-          <div className="flex items-center justify-between p-4 rounded bg-white/5 border border-white/10">
+          <Card depth="level1" className="p-4 flex items-center justify-between">
             <p className="text-sm opacity-70">Recommendation Stability</p>
             <StabilityIndicator score={currentRec.stability} />
-          </div>
+          </Card>
 
           {/* Trace Viewer Toggle */}
           <Button
@@ -218,9 +235,13 @@ export function RecommendationsPage({ onBack }) {
           </Button>
 
           {/* Trace Viewer */}
-          {showTrace && <TraceViewer trace={mockTrace} onClose={() => setShowTrace(false)} />}
-        </div>
-      </div>
+          {showTrace && (
+            <Card depth="level2" className="p-6">
+              <TraceViewer trace={mockTrace} onClose={() => setShowTrace(false)} />
+            </Card>
+          )}
+        </motion.div>
+      </motion.div>
     </motion.section>
   );
 }

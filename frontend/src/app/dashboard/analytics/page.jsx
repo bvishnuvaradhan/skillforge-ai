@@ -85,38 +85,70 @@ export function AnalyticsPage({ onBack }) {
       </div>
 
       {/* Skill DNA Section */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
+      >
         <h2 className="text-2xl font-semibold mb-6">Your Learning DNA</h2>
-        <SkillDNAExperience dnaData={mockDNA} />
-      </div>
+        <Card depth="level2" className="p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl -z-1" />
+          <div className="relative z-10">
+            <SkillDNAExperience dnaData={mockDNA} />
+          </div>
+        </Card>
+      </motion.div>
 
       {/* Forecast & Consistency */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.2 }}
+      >
         <h2 className="text-2xl font-semibold mb-6">Growth Trajectory</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ForecastChart title="Mastery Forecast" timeframe={`${timeframe} forecast`} />
-          <ConsistencyGraph title="Learning Consistency" />
+          <Card depth="level2" className="p-6">
+            <ForecastChart title="Mastery Forecast" timeframe={`${timeframe} forecast`} />
+          </Card>
+          <Card depth="level2" className="p-6">
+            <ConsistencyGraph title="Learning Consistency" />
+          </Card>
         </div>
-      </div>
+      </motion.div>
 
       {/* Retention & Decay */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+      >
         <h2 className="text-2xl font-semibold mb-6">Skill Health</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RetentionHeatmap topicStats={mockTopics} />
-          <DecayVisualization topics={mockTopics} />
+          <Card depth="level2" className="p-6">
+            <RetentionHeatmap topicStats={mockTopics} />
+          </Card>
+          <Card depth="level2" className="p-6">
+            <DecayVisualization topics={mockTopics} />
+          </Card>
         </div>
-      </div>
+      </motion.div>
 
       {/* Insights Summary */}
-      <Card className="p-8 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-white/10">
-        <h3 className="text-lg font-semibold mb-4">Key Insights</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <InsightBox title="Learning Velocity" value="2.3%" subtitle="problems/day increase" />
-          <InsightBox title="Retention Health" value="78%" subtitle="average mastery retention" />
-          <InsightBox title="Consistency Score" value="92%" subtitle="7-day streak maintained" />
-        </div>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.4 }}
+      >
+        <Card depth="level2" className="p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-400 to-purple-400 opacity-10 rounded-full blur-3xl -z-1" />
+          <h3 className="text-lg font-semibold mb-4 relative z-10">Key Insights</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            <InsightBox title="Learning Velocity" value="2.3%" subtitle="problems/day increase" />
+            <InsightBox title="Retention Health" value="78%" subtitle="average mastery retention" />
+            <InsightBox title="Consistency Score" value="92%" subtitle="7-day streak maintained" />
+          </div>
+        </Card>
+      </motion.div>
     </motion.section>
   );
 }
