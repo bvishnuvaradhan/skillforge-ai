@@ -35,22 +35,40 @@ export function DependencyGraphPage({ onBack }) {
       </div>
 
       {/* Instructions */}
-      <Card className="p-4 bg-cyan-500/10 border border-cyan-500/30 flex gap-3">
-        <LuInfo size={18} className="text-cyan-400 flex-shrink-0 mt-0.5" />
-        <div className="text-sm opacity-80">
-          <p className="font-semibold mb-1">How to explore:</p>
-          <p>Click on any topic node to see prerequisites and related skills. Lines show dependencies between topics. Dashed rings indicate recommended topics for you.</p>
-        </div>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+      >
+        <Card depth="level1" className="p-4 bg-cyan-500/10 border border-cyan-500/30 flex gap-3">
+          <LuInfo size={18} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm opacity-80">
+            <p className="font-semibold mb-1">How to explore:</p>
+            <p>Click on any topic node to see prerequisites and related skills. Lines show dependencies between topics. Dashed rings indicate recommended topics for you.</p>
+          </div>
+        </Card>
+      </motion.div>
 
       {/* Graph */}
-      <DependencyGraphExplorer onSelectTopic={setSelectedTopic} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
+      >
+        <DependencyGraphExplorer onSelectTopic={setSelectedTopic} />
+      </motion.div>
 
       {/* Learning Path */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5">
-          <h3 className="text-lg font-semibold mb-4">Recommended Learning Path</h3>
-          <div className="space-y-3">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.2 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <Card depth="level2" className="p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-400/10 rounded-full blur-2xl -z-1" />
+          <h3 className="text-lg font-semibold mb-4 relative z-10">Recommended Learning Path</h3>
+          <div className="space-y-3 relative z-10">
             {[
               { order: 1, topic: 'Arrays & Strings', status: 'mastered' },
               { order: 2, topic: 'Binary Search', status: 'developing', note: '75% mastered' },
@@ -61,6 +79,7 @@ export function DependencyGraphPage({ onBack }) {
                 key={item.topic}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
                 className={`flex items-center gap-3 p-3 rounded ${
                   item.status === 'mastered' ? 'bg-emerald-500/20' :
                   item.status === 'developing' ? 'bg-cyan-500/20' :
@@ -82,9 +101,10 @@ export function DependencyGraphPage({ onBack }) {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5">
-          <h3 className="text-lg font-semibold mb-4">Weak Foundation Areas</h3>
-          <div className="space-y-3">
+        <Card depth="level2" className="p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-400/10 rounded-full blur-2xl -z-1" />
+          <h3 className="text-lg font-semibold mb-4 relative z-10">Weak Foundation Areas</h3>
+          <div className="space-y-3 relative z-10">
             {[
               { topic: 'Recursion', mastery: 0.65, impact: 'High - blocks DP & backtracking' },
               { topic: 'String Algorithms', mastery: 0.55, impact: 'Medium - interview prep' },
@@ -94,6 +114,7 @@ export function DependencyGraphPage({ onBack }) {
                 key={item.topic}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
                 className="p-3 rounded bg-white/5 border border-white/10"
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
@@ -111,18 +132,25 @@ export function DependencyGraphPage({ onBack }) {
             ))}
           </div>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Stats */}
-      <Card className="p-6 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10">
-        <h3 className="text-lg font-semibold mb-4">Your Graph Stats</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatBox label="Total Topics" value="47" />
-          <StatBox label="Mastered" value="8" color="emerald" />
-          <StatBox label="In Progress" value="12" color="cyan" />
-          <StatBox label="Locked" value="27" color="slate" />
-        </div>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
+      >
+        <Card depth="level2" className="p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400 to-cyan-400 opacity-10 rounded-full blur-3xl -z-1" />
+          <h3 className="text-lg font-semibold mb-4 relative z-10">Your Graph Stats</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+            <StatBox label="Total Topics" value="47" />
+            <StatBox label="Mastered" value="8" color="emerald" />
+            <StatBox label="In Progress" value="12" color="cyan" />
+            <StatBox label="Locked" value="27" color="slate" />
+          </div>
+        </Card>
+      </motion.div>
     </motion.section>
   );
 }

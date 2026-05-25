@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { SkillDNAExperience } from '../components/dashboard/SkillDNAExperience';
+import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LuArrowLeft, LuDownload } from 'react-icons/lu';
 
@@ -50,34 +51,44 @@ export function SkillDNAPage({ onBack }) {
       </div>
 
       {/* Full Experience */}
-      <SkillDNAExperience dnaData={mockDNAData} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+      >
+        <Card depth="level2" className="p-8">
+          <SkillDNAExperience dnaData={mockDNAData} />
+        </Card>
+      </motion.div>
 
       {/* Additional Info */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="p-6 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-white/10"
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
       >
-        <h3 className="text-lg font-semibold mb-4">How This Helps Your Learning</h3>
-        <ul className="space-y-3 text-sm opacity-80">
-          <li className="flex gap-3">
-            <span className="text-cyan-400 font-bold">✓</span>
-            <span>Recommendations are sequenced for deep mastery first, exploration second</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="text-cyan-400 font-bold">✓</span>
-            <span>Problem difficulty increases gradually within chosen topics</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="text-cyan-400 font-bold">✓</span>
-            <span>Reinforcement cycles respect your consistency schedule</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="text-cyan-400 font-bold">✓</span>
-            <span>Learning paths prioritize foundational strength before breadth</span>
-          </li>
-        </ul>
+        <Card depth="level2" className="p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-400 to-purple-400 opacity-10 rounded-full blur-3xl -z-1" />
+          <h3 className="text-lg font-semibold mb-4 relative z-10">How This Helps Your Learning</h3>
+          <ul className="space-y-3 text-sm opacity-80 relative z-10">
+            <li className="flex gap-3">
+              <span className="text-cyan-400 font-bold">✓</span>
+              <span>Recommendations are sequenced for deep mastery first, exploration second</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-cyan-400 font-bold">✓</span>
+              <span>Problem difficulty increases gradually within chosen topics</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-cyan-400 font-bold">✓</span>
+              <span>Reinforcement cycles respect your consistency schedule</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="text-cyan-400 font-bold">✓</span>
+              <span>Learning paths prioritize foundational strength before breadth</span>
+            </li>
+          </ul>
+        </Card>
       </motion.div>
     </motion.section>
   );
