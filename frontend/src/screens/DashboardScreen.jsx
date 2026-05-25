@@ -17,6 +17,7 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer
 } from "recharts";
 import { LuZap, LuActivity, LuBrainCircuit, LuRotateCcw, LuArrowRight } from "react-icons/lu";
+import { StatCardCarousel } from "../components/dashboard/StatCardCarousel";
 
 export function DashboardScreen() {
   const router = useRouter();
@@ -137,33 +138,33 @@ export function DashboardScreen() {
           )}
         </motion.div>
 
-        {/* Momentum Summary - Reduced to 2-3 primary metrics (cognitive calm) */}
+        {/* Momentum Summary - Desktop grid, Mobile carousel */}
         <motion.div variants={itemVariants}>
           <h2 className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Your Momentum</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <StatCard
-              label="Learning Momentum"
-              value={`${Math.round(snapshot.momentumScore || 0)}%`}
-              icon={LuActivity}
-              color="cyan"
-              trend={(snapshot.momentumTrend || 0)}
-              subtext="Based on activity & consistency"
-            />
-            <StatCard
-              label="Current Streak"
-              value={`${snapshot.currentStreak || snapshot.activeDays || 0}d`}
-              icon={LuZap}
-              color="emerald"
-              subtext="Keep your momentum going"
-            />
-            <StatCard
-              label="Session Energy"
-              value={`${snapshot.energyLevel || 0}/10`}
-              icon={LuActivity}
-              color="purple"
-              subtext="Ready to learn"
-            />
-          </div>
+          <StatCardCarousel stats={[
+            {
+              label: "Learning Momentum",
+              value: `${Math.round(snapshot.momentumScore || 0)}%`,
+              icon: LuActivity,
+              color: "cyan",
+              trend: (snapshot.momentumTrend || 0),
+              subtext: "Based on activity & consistency"
+            },
+            {
+              label: "Current Streak",
+              value: `${snapshot.currentStreak || snapshot.activeDays || 0}d`,
+              icon: LuZap,
+              color: "emerald",
+              subtext: "Keep your momentum going"
+            },
+            {
+              label: "Session Energy",
+              value: `${snapshot.energyLevel || 0}/10`,
+              icon: LuActivity,
+              color: "purple",
+              subtext: "Ready to learn"
+            }
+          ]} />
           {/* Secondary metrics - collapsed by default on mobile */}
           {radarData.length > 0 && (
             <motion.div
@@ -206,8 +207,8 @@ export function DashboardScreen() {
           </motion.div>
         ) : (
           <>
-            {/* Skill DNA Radar */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Skill DNA Radar - Hidden on mobile, visible on tablet+ */}
+            <motion.div variants={itemVariants} className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card depth="level2" className="lg:col-span-2 p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                   <LuBrainCircuit size={200} />
@@ -255,6 +256,34 @@ export function DashboardScreen() {
                 <Button
                   variant="secondary"
                   className="mt-6 w-full text-xs"
+                  onClick={() => router.push('/dashboard/skill-dna')}
+                >
+                  View Details <LuArrowRight size={12} />
+                </Button>
+              </Card>
+            </motion.div>
+
+            {/* Mobile Skill DNA Summary - Shown on mobile only */}
+            <motion.div variants={itemVariants} className="md:hidden">
+              <Card depth="level2" className="p-6">
+                <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">Your Learning Style</p>
+                <h3 className="text-xl font-bold mb-3">{snapshot.skillDNA?.type || 'Analyzing...'}</h3>
+                <p className="text-xs opacity-60 leading-relaxed mb-4">
+                  {snapshot.skillDNA?.description || 'Complete more problems to discover your unique learning archetype.'}
+                </p>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%` }}
+                      className="h-full bg-gradient-to-r from-purple-400 to-cyan-400"
+                    />
+                  </div>
+                  <span className="text-xs opacity-50 flex-shrink-0">{Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%</span>
+                </div>
+                <Button
+                  variant="secondary"
+                  className="w-full text-xs"
                   onClick={() => router.push('/dashboard/skill-dna')}
                 >
                   View Details <LuArrowRight size={12} />
