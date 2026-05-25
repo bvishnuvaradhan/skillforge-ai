@@ -25,12 +25,20 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
   }[state] || 'border-cyan-500/50';
 
   const stateLabel = {
-    active: 'Priority',
-    reinforcing: 'Reinforcing',
-    exploring: 'Exploration',
-    critical: 'Critical',
-    deferred: 'Deferred'
-  }[state] || 'Active';
+    active: 'Ready to Learn',
+    reinforcing: 'Solidify Skills',
+    exploring: 'Expand Horizons',
+    critical: 'Needs Attention',
+    deferred: 'For Later'
+  }[state] || 'Ready';
+
+  const stateMessage = {
+    active: 'You\'re ready for this—let\'s level up together',
+    reinforcing: 'Strengthen what you\'ve learned with this challenge',
+    exploring: 'Time to explore new territory at your own pace',
+    critical: 'This skill needs some love, but you can handle it',
+    deferred: 'Saved for when you\'re ready'
+  }[state] || 'Tailored for your learning journey';
 
   return (
     <motion.div
@@ -55,6 +63,7 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
                 </span>
               </div>
               <h5 className="text-sm font-semibold text-white">{title}</h5>
+              <p className="text-xs mt-1 opacity-70 leading-relaxed text-emerald-300/80">{stateMessage}</p>
               <p className="text-xs mt-2 opacity-60 leading-relaxed">{why}</p>
             </div>
             <div className="text-right flex-shrink-0">

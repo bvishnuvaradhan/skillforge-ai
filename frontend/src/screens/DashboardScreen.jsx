@@ -75,13 +75,22 @@ export function DashboardScreen() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.08 }
+      transition: { staggerChildren: 0.12 }
     }
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 20,
+        mass: 1.2,
+      }
+    }
   };
 
   return (
@@ -104,18 +113,22 @@ export function DashboardScreen() {
           />
         </motion.div>
 
-        {/* Daily Focus - Most important CTA */}
+        {/* Daily Focus - Most important CTA - ELEVATED with glow */}
         <motion.div variants={itemVariants}>
           <h2 className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Your Focus Today</h2>
           {recommendations.length > 0 ? (
-            <DailyFocusCard
-              recommendations={recommendations}
-              onStart={(rec) => {
-                try { api.post(`/recommendations/${rec.id}/accept`); }
-                catch (e) { console.error('accept failed', e); }
-              }}
-              onViewMore={() => router.push('/dashboard/recommendations')}
-            />
+            <div className="relative">
+              {/* Glow background effect */}
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 blur-xl -z-1" />
+              <DailyFocusCard
+                recommendations={recommendations}
+                onStart={(rec) => {
+                  try { api.post(`/recommendations/${rec.id}/accept`); }
+                  catch (e) { console.error('accept failed', e); }
+                }}
+                onViewMore={() => router.push('/dashboard/recommendations')}
+              />
+            </div>
           ) : (
             <EmptyState
               type="recommendations"
@@ -124,10 +137,10 @@ export function DashboardScreen() {
           )}
         </motion.div>
 
-        {/* Momentum Summary */}
+        {/* Momentum Summary - Reduced to 2-3 primary metrics (cognitive calm) */}
         <motion.div variants={itemVariants}>
           <h2 className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Your Momentum</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
               label="Learning Momentum"
               value={`${Math.round(snapshot.momentumScore || 0)}%`}
@@ -141,23 +154,35 @@ export function DashboardScreen() {
               value={`${snapshot.currentStreak || snapshot.activeDays || 0}d`}
               icon={LuZap}
               color="emerald"
-              subtext="Keep going!"
+              subtext="Keep your momentum going"
             />
             <StatCard
-              label="Learning Energy"
+              label="Session Energy"
               value={`${snapshot.energyLevel || 0}/10`}
               icon={LuActivity}
               color="purple"
-              subtext="Session readiness"
-            />
-            <StatCard
-              label="Avg Mastery"
-              value={`${radarData.length > 0 ? Math.round(radarData.reduce((acc, d) => acc + d.A, 0) / radarData.length) : 0}%`}
-              icon={LuRotateCcw}
-              color="pink"
-              subtext="Topic stability"
+              subtext="Ready to learn"
             />
           </div>
+          {/* Secondary metrics - collapsed by default on mobile */}
+          {radarData.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ delay: 0.3 }}
+              className="mt-3 hidden md:block"
+            >
+              <details className="text-xs opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
+                <summary className="font-semibold">See more metrics</summary>
+                <div className="mt-3 p-3 bg-white/5 rounded text-xs">
+                  <p className="mb-2">
+                    Avg Mastery: <span className="font-semibold text-emerald-400">{Math.round(radarData.reduce((acc, d) => acc + d.A, 0) / radarData.length)}%</span>
+                  </p>
+                  <p className="opacity-50">Topics tracked: {radarData.length}</p>
+                </div>
+              </details>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
@@ -183,7 +208,7 @@ export function DashboardScreen() {
           <>
             {/* Skill DNA Radar */}
             <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 p-8 relative overflow-hidden">
+              <Card depth="level2" className="lg:col-span-2 p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                   <LuBrainCircuit size={200} />
                 </div>
@@ -209,7 +234,7 @@ export function DashboardScreen() {
               </Card>
 
               {/* Skill DNA Type */}
-              <Card className="p-6 flex flex-col justify-between">
+              <Card depth="level2" className="p-6 flex flex-col justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">Your Learning Style</p>
                   <h3 className="text-2xl font-bold mb-2">{snapshot.skillDNA?.type || 'Analyzing...'}</h3>
@@ -251,7 +276,7 @@ export function DashboardScreen() {
 
         {/* Quick Links to Analysis Pages */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card
+          <Card depth="level1"
             className="p-4 cursor-pointer hover:border-cyan-500/50 transition-all group"
             onClick={() => router.push('/dashboard/skill-dna')}
           >
@@ -260,7 +285,7 @@ export function DashboardScreen() {
             <p className="text-xs opacity-60 mt-2">Behavioral patterns & learning style</p>
           </Card>
 
-          <Card
+          <Card depth="level1"
             className="p-4 cursor-pointer hover:border-purple-500/50 transition-all group"
             onClick={() => router.push('/dashboard/learning-journey')}
           >
@@ -269,7 +294,7 @@ export function DashboardScreen() {
             <p className="text-xs opacity-60 mt-2">Topics, prerequisites & milestones</p>
           </Card>
 
-          <Card
+          <Card depth="level1"
             className="p-4 cursor-pointer hover:border-emerald-500/50 transition-all group"
             onClick={() => router.push('/dashboard/analytics')}
           >
@@ -281,7 +306,7 @@ export function DashboardScreen() {
 
         {/* Recent Activity */}
         <motion.div variants={itemVariants}>
-          <Card className="p-6">
+          <Card depth="level2" className="p-6">
             <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
               <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               Latest Submissions

@@ -170,6 +170,48 @@ export const DESIGN_TOKENS = {
     popover: '1050',
     tooltip: '1060',
   },
+
+  // Glow system (atmosphere layer)
+  glows: {
+    none: 'none',
+    subtle: '0 0 8px rgba(0, 188, 212, 0.2)',
+    soft: '0 0 16px rgba(0, 188, 212, 0.3)',
+    medium: '0 0 24px rgba(0, 188, 212, 0.4)',
+    bright: '0 0 32px rgba(0, 188, 212, 0.5)',
+    softPurple: '0 0 16px rgba(156, 39, 176, 0.3)',
+    softEmerald: '0 0 16px rgba(34, 197, 94, 0.3)',
+    softAmber: '0 0 16px rgba(245, 158, 11, 0.3)',
+  },
+
+  // Depth layers (glassmorphism + shadows)
+  depth: {
+    level1: 'bg-white/5 backdrop-blur-md border border-white/10 shadow-xs',
+    level2: 'bg-white/10 backdrop-blur-lg border border-white/20 shadow-sm',
+    level3: 'bg-slate-900/40 backdrop-blur-xl border border-white/20 shadow-md',
+    elevated: 'bg-slate-900/60 backdrop-blur-2xl border border-cyan-500/20 shadow-lg',
+  },
+
+  // Motion presets (calm, spring-based)
+  motionPresets: {
+    entrance: {
+      duration: 0.6,
+      delay: 0.1,
+      type: 'spring',
+      stiffness: 100,
+      damping: 20,
+    },
+    hover: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 10,
+    },
+    settling: {
+      type: 'spring',
+      stiffness: 60,
+      damping: 20,
+      mass: 1.5,
+    },
+  },
 };
 
 // Theme-aware gradient presets
