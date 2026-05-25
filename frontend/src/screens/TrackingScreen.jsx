@@ -7,7 +7,7 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
-import { LuGithub, LuCode, LuTrophy, LuRefreshCw, LuCheck, LuActivity, LuTrash2, LuZap, LuAlertCircle } from "react-icons/lu";
+import { LuGithub, LuCode, LuTrophy, LuRefreshCw, LuCheck, LuActivity, LuTrash2, LuZap, LuAlertTriangle } from "react-icons/lu";
 
 export function TrackingScreen() {
   const { auth } = useAuth();
@@ -97,7 +97,7 @@ export function TrackingScreen() {
                         {profile.syncStatus === 'success' && <LuCheck size={14} color="var(--success)" />}
                         {profile.syncStatus === 'success_cached' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#FFA116' }}>
-                            <LuAlertCircle size={14} title={profile.error} />
+                            <LuAlertTriangle size={14} title={profile.error} />
                             <span style={{ fontSize: '0.75rem' }}>cached</span>
                           </div>
                         )}
