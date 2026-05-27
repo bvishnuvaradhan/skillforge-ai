@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from './Card';
 import { Button } from './Button';
+import { InlineExplainButton } from '../mentor/InlineExplainButton';
 import { LuChevronDown, LuZap, LuGaugeCircle } from 'react-icons/lu';
 
 export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete }) {
@@ -105,6 +106,20 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
           <div className="mt-4 flex gap-2">
             <Button variant="primary" onClick={onAccept} className="flex-1 text-xs">Start</Button>
             <Button variant="secondary" onClick={onSnooze} className="flex-1 text-xs">Snooze</Button>
+            <InlineExplainButton
+              questionType="recommendation"
+              context={{
+                recommendation: {
+                  topic: title,
+                  id: rec.id || 'unknown',
+                  rationale: why
+                },
+                mastery: rec.mastery || {},
+                governance: rec.appliedPolicies || []
+              }}
+              label="Why?"
+              size="sm"
+            />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
