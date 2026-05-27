@@ -16,6 +16,7 @@ const { dependenciesRouter } = require("./routes/dependencies");
 const { arbitrationRouter } = require("./routes/arbitration");
 const { tracesRouter } = require("./routes/traces");
 const { observabilityRouter } = require("./routes/observability");
+const { mentorRouter } = require("./routes/mentor");
 const { initWorkers } = require("./workers");
 const { scrapingQueue, analyticsQueue } = require("./lib/queue");
 
@@ -77,6 +78,7 @@ app.use("/api/dependencies", dependenciesRouter);
 app.use("/api/arbitration", arbitrationRouter);
 app.use("/api/traces", tracesRouter);
 app.use("/api/observability", observabilityRouter);
+app.use("/api/mentor", mentorRouter);
 
 // NOTE: 404 handler will be registered after optional runtime mounts (e.g., Bull Board)
 

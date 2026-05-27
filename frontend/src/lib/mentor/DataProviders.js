@@ -212,7 +212,8 @@ export class APIDataProviders {
     try {
       const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
         method: 'GET',
-        headers: this.headers
+        headers: this.headers,
+        credentials: 'include' // Include cookies for auth
       });
 
       if (!response.ok) {
@@ -227,15 +228,15 @@ export class APIDataProviders {
   }
 
   // Create API provider functions
-  roadmap = async (userId) => this.fetchFromAPI(`/api/users/${userId}/roadmap`, userId);
-  retention = async (userId) => this.fetchFromAPI(`/api/users/${userId}/retention`, userId);
-  mastery = async (userId) => this.fetchFromAPI(`/api/users/${userId}/mastery`, userId);
-  dna = async (userId) => this.fetchFromAPI(`/api/users/${userId}/dna`, userId);
-  forecast = async (userId) => this.fetchFromAPI(`/api/users/${userId}/forecast`, userId);
-  governance = async (userId) => this.fetchFromAPI(`/api/users/${userId}/governance`, userId);
-  activity = async (userId) => this.fetchFromAPI(`/api/users/${userId}/activity`, userId);
+  roadmap = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/roadmap`, userId);
+  retention = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/retention`, userId);
+  mastery = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/mastery`, userId);
+  dna = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/dna`, userId);
+  forecast = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/forecast`, userId);
+  governance = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/governance`, userId);
+  activity = async (userId) => this.fetchFromAPI(`/api/mentor/${userId}/activity`, userId);
   recommendationHistory = async (userId) =>
-    this.fetchFromAPI(`/api/users/${userId}/recommendation-history`, userId);
+    this.fetchFromAPI(`/api/mentor/${userId}/recommendation-history`, userId);
 }
 
 // Factory function to create initialized DataProviders

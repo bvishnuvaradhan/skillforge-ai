@@ -255,9 +255,10 @@ feat(phase5.2): Adaptive coaching & learning reflection systems
 - ✅ Real-time session guidance UI
 - ✅ Autonomous reinforcement bundling
 - ✅ Admin console "Mentor Metrics" tab with gate validation display
+- ✅ Backend mentor API routes (roadmap, retention, mastery, DNA, forecast, governance, activity, recommendation-history)
+- ✅ DataProviders integration with real API endpoints
 
 ### What Needs Work
-- ⏳ Integration with actual data providers (API hookup)
 - ⏳ AI model integration (Claude API)
 - ⏳ Phase 5.3+ gate validation (real user testing)
 - ⏳ Interview Intelligence (Phase 5G - deferred)
@@ -514,6 +515,92 @@ const allCriteriaMet = gateCriteria.every(c => c.pass);
 ```
 feat(admin): Add mentor metrics tab to governance console
 1 file changed, 150+ insertions
+```
+
+---
+
+## ✅ COMPLETED: DATA PROVIDER INTEGRATION - BACKEND API ROUTES
+
+### Backend Implementation
+**File Created**: `backend/src/routes/mentor.js`
+- 8 API endpoints for mentor data access
+- All endpoints require authentication (requireAuth middleware)
+- All endpoints enforce user data isolation (can only request own data)
+
+### API Endpoints Created
+
+1. **GET /api/mentor/:userId/roadmap**
+   - Returns: { nodes, edges, userProgress }
+   - Data: Dependency graph + topic completion status
+
+2. **GET /api/mentor/:userId/retention**
+   - Returns: { heatmap, decayRates }
+   - Data: Days since practice, retention rate, decay rate per topic
+
+3. **GET /api/mentor/:userId/mastery**
+   - Returns: { [topic]: score, ... }
+   - Data: Mastery scores for all topics
+
+4. **GET /api/mentor/:userId/dna**
+   - Returns: { type, confidence, description, focusStyle, learningRhythm, ... }
+   - Data: User learning profile (Deep Diver, Breadth Explorer, etc.)
+
+5. **GET /api/mentor/:userId/forecast**
+   - Returns: { predictions, timeHorizon, confidence, trendingTopics, riskingTopics }
+   - Data: 7-day decay predictions
+
+6. **GET /api/mentor/:userId/governance**
+   - Returns: { policies, activeCooldowns, capacityRemaining, constraints }
+   - Data: Active governance policies and constraints
+
+7. **GET /api/mentor/:userId/activity**
+   - Returns: { sessionsLastWeek, problemsSolvedLastWeek, averageSessionDuration, currentStreak, lastActivityTime, focusTopics }
+   - Data: Recent learning activity metrics
+
+8. **GET /api/mentor/:userId/recommendation-history**
+   - Returns: { recommendations, acceptanceRate, completionRate, averageEffectiveness, recentRecommendations }
+   - Data: User's recommendation history and acceptance patterns
+
+### Frontend Integration
+**File Modified**: `frontend/src/lib/mentor/DataProviders.js`
+- Updated APIDataProviders class to use `/api/mentor/` endpoints
+- Fixed endpoint URLs from `/api/users/` to `/api/mentor/`
+- Added `credentials: 'include'` for auth cookie handling
+
+### Backend Registration
+**File Modified**: `backend/src/index.js`
+- Added import: `const { mentorRouter } = require("./routes/mentor");`
+- Registered route: `app.use("/api/mentor", mentorRouter);`
+
+### Data Flow (Complete)
+```
+Frontend (DataProviders.fetch)
+  ↓
+APIDataProviders class
+  ↓
+/api/mentor/:userId/[endpoint]
+  ↓
+Express Route Handler
+  ↓
+Database Models (TopicStat, DependencyGraph, DNAProfile, etc.)
+  ↓
+JSON Response
+  ↓
+MentorContext (caches 5 min)
+  ↓
+MentorEngine / CoachingEngine / ReflectionEngine
+  ↓
+MentorIntegration.js
+  ↓
+UI Components
+```
+
+### Commit: TBD
+```
+feat(backend+frontend): Add mentor API routes & DataProvider integration
+2 files changed, 150+ insertions
+- Created backend/src/routes/mentor.js with 8 endpoints
+- Updated APIDataProviders to use new endpoints
 ```
 
 ---
