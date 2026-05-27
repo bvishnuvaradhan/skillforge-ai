@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { StatCard } from '../ui/StatCard';
+import { StatCard } from './StatCard';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
 export function StatCardCarousel({ stats = [] }) {
