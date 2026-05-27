@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { LuActivity, LuDatabaseBackup, LuSettings2, LuPlayCircle, LuAlertTriangle } from 'react-icons/lu';
+import { LuActivity, LuDatabaseBackup, LuSettings2, LuPlayCircle, LuAlertTriangle, LuBrain, LuCheckCircle, LuXCircle, LuAlertCircle } from 'react-icons/lu';
 
 export function AdminGovernanceConsole() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -10,6 +10,7 @@ export function AdminGovernanceConsole() {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LuActivity },
+    { id: 'mentor', label: 'Mentor Metrics', icon: LuBrain },
     { id: 'events', label: 'Events', icon: LuDatabaseBackup },
     { id: 'governance', label: 'Governance', icon: LuSettings2 },
     { id: 'replay', label: 'Replay Tools', icon: LuPlayCircle },
@@ -51,6 +52,7 @@ export function AdminGovernanceConsole() {
       {/* Tab Content */}
       <div className="space-y-6">
         {activeTab === 'overview' && <OverviewTab />}
+        {activeTab === 'mentor' && <MentorMetricsTab />}
         {activeTab === 'events' && <EventsTab />}
         {activeTab === 'governance' && <GovernanceTab />}
         {activeTab === 'replay' && <ReplayTab />}
@@ -114,6 +116,284 @@ function OverviewTab() {
         </div>
       </Card>
     </motion.div>
+  );
+}
+
+function MentorMetricsTab() {
+  // Mock mentor trust metrics (will integrate with MentorTrustMetrics.js in real implementation)
+  const trustMetrics = {
+    trustScore: 0.78,
+    avgConfidence: 0.76,
+    uncertaintyCommunicationRate: 0.85,
+    toneViolations: 2,
+    toneViolationRate: 0.03,
+    userSatisfaction: 0.72,
+    governanceViolations: 0,
+    totalResponses: 67,
+    avgResponseTime: 1240 // milliseconds
+  };
+
+  // Gate validation criteria
+  const gateCriteria = [
+    {
+      name: 'Trust Score',
+      requirement: '≥ 0.7',
+      current: trustMetrics.trustScore,
+      status: trustMetrics.trustScore >= 0.7 ? 'pass' : 'fail',
+      detail: `${(trustMetrics.trustScore * 100).toFixed(1)}% confidence consistency`
+    },
+    {
+      name: 'User Satisfaction',
+      requirement: '≥ 60%',
+      current: trustMetrics.userSatisfaction * 100,
+      status: trustMetrics.userSatisfaction >= 0.6 ? 'pass' : 'fail',
+      detail: `${(trustMetrics.userSatisfaction * 100).toFixed(1)}% average rating`
+    },
+    {
+      name: 'Governance Violations',
+      requirement: '= 0',
+      current: trustMetrics.governanceViolations,
+      status: trustMetrics.governanceViolations === 0 ? 'pass' : 'fail',
+      detail: 'Zero policy violations detected'
+    },
+    {
+      name: 'Tone Compliance',
+      requirement: '< 5%',
+      current: trustMetrics.toneViolationRate * 100,
+      status: trustMetrics.toneViolationRate < 0.05 ? 'pass' : 'fail',
+      detail: `${trustMetrics.toneViolations} violations out of ${trustMetrics.totalResponses}`
+    }
+  ];
+
+  const allCriteriaMet = gateCriteria.every(c => c.status === 'pass');
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      {/* Gate Status Card */}
+      <Card className={`p-6 border-l-4 ${allCriteriaMet ? 'border-emerald-500 bg-emerald-500/10' : 'border-amber-500 bg-amber-500/10'}`}>
+        <div className="flex gap-3 items-start">
+          {allCriteriaMet ? (
+            <LuCheckCircle className="text-emerald-400 flex-shrink-0 mt-0.5" size={24} />
+          ) : (
+            <LuAlertCircle className="text-amber-400 flex-shrink-0 mt-0.5" size={24} />
+          )}
+          <div className="flex-1">
+            <p className={`font-semibold ${allCriteriaMet ? 'text-emerald-300' : 'text-amber-300'}`}>
+              Phase 5.3+ Gate Status
+            </p>
+            <p className="text-sm opacity-80 mt-1">
+              {allCriteriaMet
+                ? '✅ All criteria met - autonomous systems ready for launch'
+                : '⏳ Waiting for gate criteria: autonomous systems held pending validation'}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Gate Criteria Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {gateCriteria.map((criterion, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Card className={`p-4 border ${criterion.status === 'pass' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-medium text-sm">{criterion.name}</p>
+                  <p className="text-xs opacity-60 mt-1">Requirement: {criterion.requirement}</p>
+                  <p className="text-xs opacity-70 mt-2 font-mono">{criterion.detail}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  {criterion.status === 'pass' ? (
+                    <LuCheckCircle className="text-emerald-400" size={20} />
+                  ) : (
+                    <LuXCircle className="text-amber-400" size={20} />
+                  )}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mentor Quality Metrics */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Mentor Quality Metrics</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MetricDisplay
+            label="Trust Score"
+            value={trustMetrics.trustScore}
+            unit="0-1"
+            status={trustMetrics.trustScore >= 0.7 ? 'good' : 'caution'}
+          />
+          <MetricDisplay
+            label="Avg Confidence"
+            value={trustMetrics.avgConfidence}
+            unit="0-1"
+            status={trustMetrics.avgConfidence >= 0.75 ? 'good' : 'caution'}
+          />
+          <MetricDisplay
+            label="Uncertainty Communication"
+            value={trustMetrics.uncertaintyCommunicationRate}
+            unit="0-1"
+            status={trustMetrics.uncertaintyCommunicationRate >= 0.8 ? 'good' : 'caution'}
+          />
+          <MetricDisplay
+            label="User Satisfaction"
+            value={trustMetrics.userSatisfaction}
+            unit="0-1"
+            status={trustMetrics.userSatisfaction >= 0.7 ? 'good' : 'caution'}
+          />
+          <MetricDisplay
+            label="Tone Compliance"
+            value={1 - trustMetrics.toneViolationRate}
+            unit="0-1"
+            status={trustMetrics.toneViolationRate < 0.05 ? 'good' : 'caution'}
+          />
+          <MetricDisplay
+            label="Avg Response Time"
+            value={trustMetrics.avgResponseTime}
+            unit="ms"
+            status={trustMetrics.avgResponseTime < 2000 ? 'good' : 'caution'}
+          />
+        </div>
+      </Card>
+
+      {/* Response Quality Breakdown */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Response Quality Analysis</h3>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span>Uncertainty Communicated</span>
+              <span className="font-medium text-cyan-400">{Math.round(trustMetrics.uncertaintyCommunicationRate * 100)}%</span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-2">
+              <div
+                className="bg-cyan-500 h-full rounded-full"
+                style={{ width: `${trustMetrics.uncertaintyCommunicationRate * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span>Governance Policy Compliance</span>
+              <span className="font-medium text-emerald-400">{trustMetrics.governanceViolations === 0 ? '100%' : '95%'}</span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-2">
+              <div
+                className="bg-emerald-500 h-full rounded-full"
+                style={{ width: `${trustMetrics.governanceViolations === 0 ? 100 : 95}%` }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span>Tone Compliance (no guilt/pressure words)</span>
+              <span className="font-medium text-emerald-400">{Math.round((1 - trustMetrics.toneViolationRate) * 100)}%</span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-2">
+              <div
+                className="bg-emerald-500 h-full rounded-full"
+                style={{ width: `${(1 - trustMetrics.toneViolationRate) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Violation Details */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Violation Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded bg-white/5">
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Tone Violations</p>
+            <p className="text-3xl font-bold text-amber-400">{trustMetrics.toneViolations}</p>
+            <p className="text-xs opacity-60 mt-1">out of {trustMetrics.totalResponses} responses</p>
+          </div>
+
+          <div className="p-4 rounded bg-white/5">
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Governance Violations</p>
+            <p className="text-3xl font-bold text-emerald-400">{trustMetrics.governanceViolations}</p>
+            <p className="text-xs opacity-60 mt-1">Zero tolerance policy</p>
+          </div>
+
+          <div className="p-4 rounded bg-white/5">
+            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Total Responses</p>
+            <p className="text-3xl font-bold text-cyan-400">{trustMetrics.totalResponses}</p>
+            <p className="text-xs opacity-60 mt-1">monitored this period</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Mentor Features Status */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Mentor Feature Status</h3>
+        <div className="space-y-3">
+          <FeatureRow
+            name="5.0: Conversational Explainability"
+            status="active"
+            description="Why-question answering with uncertainty communication"
+          />
+          <FeatureRow
+            name="5.1: Mentor Core System"
+            status="active"
+            description="Contextual AI reasoning with governance respect"
+          />
+          <FeatureRow
+            name="5.2: Coaching & Reflection"
+            status="active"
+            description="Concrete data-backed insights"
+          />
+          <FeatureRow
+            name="5.3: Autonomous Reinforcement"
+            status={allCriteriaMet ? 'active' : 'gated'}
+            description="Smart reinforcement bundling (requires gate pass)"
+          />
+          <FeatureRow
+            name="5.4: Session Intelligence"
+            status={allCriteriaMet ? 'active' : 'gated'}
+            description="Real-time session guidance (requires gate pass)"
+          />
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+function MetricDisplay({ label, value, unit, status }) {
+  const statusColor = status === 'good' ? 'text-emerald-400' : 'text-amber-400';
+
+  return (
+    <div className="p-4 rounded bg-white/5 text-center">
+      <p className="text-xs opacity-50 uppercase tracking-wider mb-2">{label}</p>
+      <p className={`text-3xl font-bold ${statusColor}`}>
+        {typeof value === 'number' && value < 10 ? value.toFixed(2) : value}
+      </p>
+      <p className="text-xs opacity-60 mt-1">{unit}</p>
+    </div>
+  );
+}
+
+function FeatureRow({ name, status, description }) {
+  const statusColor = status === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300';
+  const statusLabel = status === 'active' ? 'Active' : 'Gated (Pending)';
+
+  return (
+    <div className="flex items-start justify-between p-3 rounded bg-white/5 hover:bg-white/10 transition-colors">
+      <div>
+        <p className="text-sm font-medium">{name}</p>
+        <p className="text-xs opacity-60 mt-1">{description}</p>
+      </div>
+      <span className={`text-xs font-medium px-2 py-1 rounded flex-shrink-0 ${statusColor}`}>
+        {statusLabel}
+      </span>
+    </div>
   );
 }
 
