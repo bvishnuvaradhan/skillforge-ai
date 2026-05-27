@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { ConversationalUI } from './ConversationalUI';
-import { LuMessageCircle, LuX, LuChevronDown } from 'react-icons/lu';
+import { MentorPreferencesPanel } from './MentorPreferencesPanel';
+import { LuMessageCircle, LuX, LuChevronDown, LuSettings } from 'react-icons/lu';
 
 export function MentorPanel({
   isOpen = true,
   onClose,
   context = {},
-  compact = false
+  compact = false,
+  userId = 'user'
 }) {
   const [expanded, setExpanded] = useState(!compact);
   const [mentorResponse, setMentorResponse] = useState(null);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const handleResponse = (response) => {
     setMentorResponse(response);
@@ -90,22 +93,56 @@ export function MentorPanel({
               <p className="text-xs opacity-50">Ask me anything about your learning</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white"
-            aria-label="Close mentor"
-          >
-            <LuX size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPreferences(!showPreferences)}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white"
+              aria-label="Mentor settings"
+              title="Open mentor settings"
+            >
+              <LuSettings size={18} />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white"
+              aria-label="Close mentor"
+            >
+              <LuX size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Main content */}
+        {/* Preferences Panel or Main Content */}
         <div className="flex-1 overflow-hidden">
-          <ConversationalUI
-            context={context}
-            onResponse={handleResponse}
-            compact={false}
-          />
+          <AnimatePresence mode="wait">
+            {showPreferences ? (
+              <motion.div
+                key="preferences"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="p-4 overflow-y-auto h-full"
+              >
+                <MentorPreferencesPanel
+                  userId={userId}
+                  onClose={() => setShowPreferences(false)}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="content"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+              >
+                <ConversationalUI
+                  context={context}
+                  onResponse={setMentorResponse}
+                  compact={false}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Info footer */}
@@ -146,7 +183,7 @@ export function MentorFloatingButton({ onClick, hasUnread = false }) {
 }
 
 // Mentor panel container (for dashboard page)
-export function MentorPanelContainer({ context }) {
+export function MentorPanelContainer({ context, userId = 'user' }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -180,6 +217,7 @@ export function MentorPanelContainer({ context }) {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 context={context}
+                userId={userId}
                 compact={false}
               />
             </motion.div>
