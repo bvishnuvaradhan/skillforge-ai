@@ -257,9 +257,9 @@ feat(phase5.2): Adaptive coaching & learning reflection systems
 - ✅ Admin console "Mentor Metrics" tab with gate validation display
 - ✅ Backend mentor API routes (roadmap, retention, mastery, DNA, forecast, governance, activity, recommendation-history)
 - ✅ DataProviders integration with real API endpoints
+- ✅ Claude AI integration (via backend endpoints)
 
 ### What Needs Work
-- ⏳ AI model integration (Claude API)
 - ⏳ Phase 5.3+ gate validation (real user testing)
 - ⏳ Interview Intelligence (Phase 5G - deferred)
 
@@ -601,6 +601,87 @@ feat(backend+frontend): Add mentor API routes & DataProvider integration
 2 files changed, 150+ insertions
 - Created backend/src/routes/mentor.js with 8 endpoints
 - Updated APIDataProviders to use new endpoints
+```
+
+---
+
+## ✅ COMPLETED: AI MODEL INTEGRATION - CLAUDE API
+
+### Backend Implementation
+**File Created**: `backend/src/services/mentor-ai.service.js`
+- MentorAIService class with Claude 3.5 Sonnet integration
+- Methods for generating mentor responses, explanations, insights, and reflections
+- Error handling with fallbacks
+- Uses ANTHROPIC_API_KEY from environment variables
+
+### New API Endpoints (Extended mentor routes)
+
+1. **POST /api/mentor/:userId/response**
+   - Input: { systemPrompt, userPrompt }
+   - Output: { response }
+   - Purpose: Generate general mentor response using Claude
+
+2. **POST /api/mentor/:userId/explain**
+   - Input: { explanationType, context }
+   - Output: { explanation }
+   - Purpose: Generate explanation for concepts (confidence, uncertainty, etc.)
+
+3. **POST /api/mentor/:userId/insight**
+   - Input: { learnerProfile, recentActivity }
+   - Output: { insight }
+   - Purpose: Generate coaching insights (strategy, pacing, burnout detection)
+
+4. **POST /api/mentor/:userId/reflection**
+   - Input: { weeklyData }
+   - Output: { reflection }
+   - Purpose: Generate concrete weekly reflections with actual data
+
+### Frontend Integration
+**File Created**: `frontend/src/lib/mentor/AIModelProvider.js`
+- Factory functions to create AI providers:
+  - createAIModelProvider(userId, apiBaseUrl)
+  - createExplanationProvider(userId, apiBaseUrl)
+  - createInsightProvider(userId, apiBaseUrl)
+  - createReflectionProvider(userId, apiBaseUrl)
+- Calls backend endpoints (secure, authenticated)
+- Handles errors gracefully
+
+### Backend Route Integration
+**File Modified**: `backend/src/routes/mentor.js`
+- Added import: `const { mentorAIService } = require("../services/mentor-ai.service");`
+- Registered 4 POST endpoints for AI generation
+- All endpoints require authentication (requireAuth middleware)
+- User data isolation enforced
+
+### Implementation Flow
+```
+Frontend (MentorEngine/CoachingEngine/ReflectionEngine)
+  ↓
+AIModelProvider functions (fetch to backend)
+  ↓
+POST /api/mentor/:userId/[endpoint]
+  ↓
+MentorAIService (Claude API call)
+  ↓
+Claude 3.5 Sonnet
+  ↓
+JSON response
+  ↓
+Frontend processing & display
+```
+
+### Requirements
+- Environment variable: `ANTHROPIC_API_KEY` must be set in backend
+- Claude SDK: `@anthropic-ai/sdk` (needs to be installed in backend package.json)
+- Model: Claude 3.5 Sonnet (Latest, recommended for reasoning)
+
+### Commit: TBD
+```
+feat(ai): Add Claude AI integration with backend endpoints
+2 files changed, 100+ insertions
+- Created backend/src/services/mentor-ai.service.js
+- Created frontend/src/lib/mentor/AIModelProvider.js
+- Extended backend/src/routes/mentor.js with AI endpoints
 ```
 
 ---

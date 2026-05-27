@@ -8,6 +8,7 @@ const { DecayForecastModel } = require("../models/DecayForecast");
 const { RecommendationModel } = require("../models/Recommendation");
 const { RecommendationHistoryModel } = require("../models/RecommendationHistory");
 const { SubmissionModel } = require("../models/Submission");
+const { mentorAIService } = require("../services/mentor-ai.service");
 
 const router = Router();
 
@@ -309,6 +310,121 @@ router.get("/:userId/recommendation-history", requireAuth, async (req, res) => {
       recentRecommendations
     });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/mentor/:userId/response
+ * Generate AI mentor response
+ */
+router.post("/:userId/response", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { systemPrompt, userPrompt } = req.body;
+
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (!systemPrompt || !userPrompt) {
+      return res.status(400).json({ error: "Missing systemPrompt or userPrompt" });
+    }
+
+    const response = await mentorAIService.generateMentorResponse(
+      systemPrompt,
+      userPrompt
+    );
+
+    res.json({ response });
+  } catch (error) {
+    console.error("Failed to generate mentor response:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/mentor/:userId/explain
+ * Generate explanation for a concept
+ */
+router.post("/:userId/explain", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { explanationType, context } = req.body;
+
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (!explanationType || !context) {
+      return res.status(400).json({ error: "Missing explanationType or context" });
+    }
+
+    const explanation = await mentorAIService.generateExplanation(
+      explanationType,
+      context
+    );
+
+    res.json({ explanation });
+  } catch (error) {
+    console.error("Failed to generate explanation:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/mentor/:userId/insight
+ * Generate coaching insight
+ */
+router.post("/:userId/insight", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { learnerProfile, recentActivity } = req.body;
+
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (!learnerProfile || !recentActivity) {
+      return res
+        .status(400)
+        .json({ error: "Missing learnerProfile or recentActivity" });
+    }
+
+    const insight = await mentorAIService.generateCoachingInsight(
+      learnerProfile,
+      recentActivity
+    );
+
+    res.json({ insight });
+  } catch (error) {
+    console.error("Failed to generate coaching insight:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/mentor/:userId/reflection
+ * Generate weekly reflection
+ */
+router.post("/:userId/reflection", requireAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { weeklyData } = req.body;
+
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (!weeklyData) {
+      return res.status(400).json({ error: "Missing weeklyData" });
+    }
+
+    const reflection = await mentorAIService.generateReflection(weeklyData);
+
+    res.json({ reflection });
+  } catch (error) {
+    console.error("Failed to generate reflection:", error);
     res.status(500).json({ error: error.message });
   }
 });
