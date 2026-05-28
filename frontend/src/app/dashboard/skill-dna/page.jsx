@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { SkillDNAExperience } from '../components/dashboard/SkillDNAExperience';
 import { Card } from '../components/ui/Card';

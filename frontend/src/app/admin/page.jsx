@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { AdminGovernanceConsole } from '../components/dashboard/AdminGovernanceConsole';
 import { Button } from '../components/ui/Button';
