@@ -10,7 +10,7 @@ export function ConversationalUI({ context = {}, onResponse, compact = false }) 
   const [question, setQuestion] = useState('');
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  // selectedQuestion intentionally removed to avoid unused-state warnings
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -114,13 +114,10 @@ export function ConversationalUI({ context = {}, onResponse, compact = false }) 
   ];
 
   const handleSuggestedQuestion = async (q) => {
+    // set suggested text and submit immediately
     setQuestion(q.text);
-    setSelectedQuestion(q.type);
-
-    // Auto-submit after state update
-    setTimeout(() => {
-      handleSubmit({ preventDefault: () => {} });
-    }, 0);
+    // Use next tick to ensure state updates before submit
+    setTimeout(() => handleSubmit({ preventDefault: () => {} }), 0);
   };
 
   if (compact && conversation.length === 0) {
