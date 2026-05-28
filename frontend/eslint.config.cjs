@@ -38,8 +38,8 @@ module.exports = [
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
-      // Temporarily disable no-unused-vars to reduce noise while we fix files incrementally.
-      'no-unused-vars': 'off',
+      // Re-enable no-unused-vars as warnings to surface unused symbols for incremental fixes.
+      'no-unused-vars': ['warn', { varsIgnorePattern: '^React$' }],
     },
   },
   // TypeScript files: use the TypeScript parser and basic plugin so types parse correctly
