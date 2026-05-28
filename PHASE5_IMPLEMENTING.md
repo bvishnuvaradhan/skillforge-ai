@@ -492,13 +492,7 @@ feat(phase5.3-gates): Human override controls & trust metrics validation
   - 5.3-5.4: Gated (requires gate pass)
 
 ### Integration with MentorTrustMetrics
-Current implementation uses mock data. Next step: connect to real MentorTrustMetrics.js:
-```javascript
-// Real integration (future):
-import { MentorTrustMetrics } from '../../lib/mentor/MentorTrustMetrics';
-const metrics = mentorTrustMetrics.getMetrics();
-const gateStatus = mentorTrustMetrics.getGateStatus();
-```
+Admin console now integrates with `frontend/src/lib/mentor/MentorTrustMetrics.js` and reads live metrics for gate validation and display. The UI falls back to a conservative mock if metrics fail to load.
 
 ### Gate Validation Logic
 ```javascript

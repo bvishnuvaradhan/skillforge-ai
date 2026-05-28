@@ -7,13 +7,13 @@ export class MentorTrustMetrics {
       totalResponses: 0,
       userRatings: [],
       confidenceScores: [],
-      uncertaintyDisclaimer usage: 0,
+      uncertaintyDisclaimerUsage: 0,
       governanceViolations: 0,
       averageResponseTime: 0,
       userSatisfaction: 0, // 0-100
       responseQuality: 0, // 0-100
       trustScore: 0.5, // 0-1 overall trust
-      tone violations: [] // Track any tone issues
+      toneViolations: [] // Track any tone issues
     };
 
     this.history = [];
@@ -31,7 +31,7 @@ export class MentorTrustMetrics {
 
     // Track uncertainty communication
     if (response.uncertainty && response.uncertainty.level !== 'none') {
-      this.metrics.uncertaintyDisclaimer usage++;
+      this.metrics.uncertaintyDisclaimerUsage++;
     }
 
     // Track user rating if provided
@@ -123,7 +123,7 @@ export class MentorTrustMetrics {
     }
 
     // Uncertainty communication (0.2 points)
-    const uncertaintyRate = this.metrics.uncertaintyDisclaimer usage / Math.max(this.metrics.totalResponses, 1);
+    const uncertaintyRate = this.metrics.uncertaintyDisclaimerUsage / Math.max(this.metrics.totalResponses, 1);
     if (uncertaintyRate > 0.7) {
       score += 0.2; // Communicates uncertainty well
     } else if (uncertaintyRate > 0.4) {
@@ -169,14 +169,14 @@ export class MentorTrustMetrics {
       ...this.metrics,
       averageConfidence: this.metrics.confidenceScores.length > 0
         ? (this.metrics.confidenceScores.reduce((a, b) => a + b, 0) /
-            this.metrics.confidenceScores.length).toFixed(2)
-        : 'N/A',
+            this.metrics.confidenceScores.length)
+        : null,
       uncertaintyRate: (
-        (this.metrics.uncertaintyDisclaimer usage / Math.max(this.metrics.totalResponses, 1)) * 100
-      ).toFixed(1),
+        (this.metrics.uncertaintyDisclaimerUsage / Math.max(this.metrics.totalResponses, 1)) * 100
+      ),
       toneViolationRate: (
         (this.metrics.toneViolations.length / Math.max(this.metrics.totalResponses, 1)) * 100
-      ).toFixed(1),
+      ),
       trustStatus: this.getTrustStatus()
     };
   }
@@ -213,13 +213,13 @@ export class MentorTrustMetrics {
       trustScore: {
         name: 'Trust Score',
         required: '≥ 0.7',
-        actual: this.metrics.trustScore.toFixed(2),
+        actual: Number(this.metrics.trustScore.toFixed(2)),
         pass: criteria.trustScoreOK
       },
       satisfaction: {
         name: 'User Satisfaction',
         required: '≥ 60% or N/A',
-        actual: `${this.metrics.userSatisfaction}%`,
+        actual: this.metrics.userSatisfaction,
         pass: criteria.satisfactionOK
       },
       governance: {
@@ -231,7 +231,7 @@ export class MentorTrustMetrics {
       tone: {
         name: 'Tone Compliance',
         required: '< 5% violations',
-        actual: `${((this.metrics.toneViolations.length / Math.max(this.metrics.totalResponses, 1)) * 100).toFixed(1)}%`,
+        actual: Number(((this.metrics.toneViolations.length / Math.max(this.metrics.totalResponses, 1)) * 100).toFixed(1)),
         pass: criteria.toneOK
       },
       overallStatus: criteria.overallPass ? '✅ GATE PASS' : '⏳ CONTINUE MONITORING'
@@ -255,10 +255,12 @@ export class MentorTrustMetrics {
   // Save to localStorage
   saveToStorage() {
     try {
-      localStorage.setItem(
-        'mentor_trust_metrics',
-        JSON.stringify({ metrics: this.metrics, history: this.history })
-      );
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(
+          'mentor_trust_metrics',
+          JSON.stringify({ metrics: this.metrics, history: this.history })
+        );
+      }
     } catch (error) {
       console.warn('Failed to save trust metrics:', error);
     }
@@ -267,11 +269,13 @@ export class MentorTrustMetrics {
   // Load from localStorage
   loadFromStorage() {
     try {
-      const stored = localStorage.getItem('mentor_trust_metrics');
-      if (stored) {
-        const data = JSON.parse(stored);
-        this.metrics = { ...this.metrics, ...data.metrics };
-        this.history = data.history || [];
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem('mentor_trust_metrics');
+        if (stored) {
+          const data = JSON.parse(stored);
+          this.metrics = { ...this.metrics, ...data.metrics };
+          this.history = data.history || [];
+        }
       }
     } catch (error) {
       console.warn('Failed to load trust metrics:', error);
@@ -284,7 +288,7 @@ export class MentorTrustMetrics {
       totalResponses: 0,
       userRatings: [],
       confidenceScores: [],
-      uncertaintyDisclaimer usage: 0,
+      uncertaintyDisclaimerUsage: 0,
       governanceViolations: 0,
       userSatisfaction: 0,
       responseQuality: 0,

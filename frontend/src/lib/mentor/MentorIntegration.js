@@ -10,12 +10,14 @@ import { CoachingEngine } from './CoachingEngine';
 import { ReflectionEngine } from './ReflectionEngine';
 import { SessionMonitor } from './SessionMonitor';
 import { ReinforcementPlanner } from './ReinforcementPlanner';
+import defaultProviders from './providers';
+import defaultAI from './aiProviders';
 
 export class MentorIntegration {
   constructor(userId, dataProviders, aiModelProvider = null) {
     this.userId = userId;
-    this.dataProviders = dataProviders;
-    this.aiModelProvider = aiModelProvider;
+    this.dataProviders = dataProviders || defaultProviders;
+    this.aiModelProvider = aiModelProvider || defaultAI.aiModelProvider;
 
     // Initialize all subsystems
     this.mentorContext = new MentorContext();

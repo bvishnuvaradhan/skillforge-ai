@@ -240,7 +240,7 @@ export class APIDataProviders {
 }
 
 // Factory function to create initialized DataProviders
-export function createDataProviders(useMock = true, apiBaseUrl = null) {
+export function createDataProviders(useMock = true, apiBaseUrl = '') {
   const providers = new DataProviders();
 
   if (useMock) {
@@ -248,9 +248,10 @@ export function createDataProviders(useMock = true, apiBaseUrl = null) {
     Object.entries(MockDataProviders).forEach(([name, provider]) => {
       providers.registerProvider(name, provider);
     });
-  } else if (apiBaseUrl) {
-    // Register API providers
-    const api = new APIDataProviders(apiBaseUrl);
+  } else {
+    // Ensure apiBaseUrl is a string ('' means same-origin)
+    const base = apiBaseUrl || '';
+    const api = new APIDataProviders(base);
     providers.registerProvider('roadmap', api.roadmap);
     providers.registerProvider('retention', api.retention);
     providers.registerProvider('mastery', api.mastery);

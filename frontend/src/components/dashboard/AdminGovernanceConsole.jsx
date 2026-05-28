@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { LuActivity, LuDatabaseBackup, LuSettings2, LuPlayCircle, LuAlertTriangle, LuBrain, LuCheckCircle, LuXCircle, LuAlertCircle } from 'react-icons/lu';
+import MentorTrustMetrics from '../../lib/mentor/MentorTrustMetrics';
 
 export function AdminGovernanceConsole() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -120,18 +121,44 @@ function OverviewTab() {
 }
 
 function MentorMetricsTab() {
-  // Mock mentor trust metrics (will integrate with MentorTrustMetrics.js in real implementation)
-  const trustMetrics = {
-    trustScore: 0.78,
-    avgConfidence: 0.76,
-    uncertaintyCommunicationRate: 0.85,
-    toneViolations: 2,
-    toneViolationRate: 0.03,
-    userSatisfaction: 0.72,
-    governanceViolations: 0,
-    totalResponses: 67,
-    avgResponseTime: 1240 // milliseconds
-  };
+  // Use MentorTrustMetrics to provide real metrics
+  const [trustMetrics, setTrustMetrics] = React.useState(null);
+
+  React.useEffect(() => {
+    try {
+      const mtm = new MentorTrustMetrics();
+      const metrics = mtm.getMetrics();
+      const gate = mtm.getGateStatus();
+
+      setTrustMetrics({
+        trustScore: metrics.trustScore || mtm.metrics.trustScore,
+        avgConfidence: metrics.averageConfidence ?? mtm.metrics.confidenceScores.length > 0 ? (mtm.metrics.confidenceScores.reduce((a,b)=>a+b,0)/mtm.metrics.confidenceScores.length) : 0,
+        uncertaintyCommunicationRate: metrics.uncertaintyRate ? metrics.uncertaintyRate / 100 : (mtm.metrics.uncertaintyDisclaimerUsage / Math.max(mtm.metrics.totalResponses,1)),
+        toneViolations: mtm.metrics.toneViolations.length,
+        toneViolationRate: gate.tone.actual ? Number(gate.tone.actual) / 100 : (mtm.metrics.toneViolations.length / Math.max(mtm.metrics.totalResponses,1)),
+        userSatisfaction: mtm.metrics.userSatisfaction / 100 || 0,
+        governanceViolations: mtm.metrics.governanceViolations,
+        totalResponses: mtm.metrics.totalResponses,
+        avgResponseTime: mtm.metrics.averageResponseTime
+      });
+    } catch (error) {
+      console.warn('Failed to load MentorTrustMetrics:', error);
+      // Fallback to a conservative mock
+      setTrustMetrics({
+        trustScore: 0.5,
+        avgConfidence: 0.5,
+        uncertaintyCommunicationRate: 0.5,
+        toneViolations: 0,
+        toneViolationRate: 0,
+        userSatisfaction: 0.5,
+        governanceViolations: 0,
+        totalResponses: 0,
+        avgResponseTime: 0
+      });
+    }
+  }, []);
+
+  if (!trustMetrics) return <div>Loading mentor metrics...</div>;
 
   // Gate validation criteria
   const gateCriteria = [
