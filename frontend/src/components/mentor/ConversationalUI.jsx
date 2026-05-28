@@ -110,7 +110,7 @@ export function ConversationalUI({ context = {}, onResponse, compact = false }) 
     { type: 'recommendation', text: 'Why is this recommended?' },
     { type: 'roadmap', text: 'Explain my learning roadmap' },
     { type: 'retention', text: 'Why should I practice this now?' },
-    { type: 'forecast', text: 'What's my progress forecast?' }
+    { type: 'forecast', text: "What's my progress forecast?" }
   ];
 
   const handleSuggestedQuestion = async (q) => {

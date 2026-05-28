@@ -254,7 +254,7 @@ export class ReinforcementPlanner {
     if (mastery < 0.6) {
       parts.push('Low mastery suggests foundational reinforcement is valuable');
     } else if (mastery > 0.8) {
-      parts.push('High mastery means you'll reinforce quickly and maintain better');
+      parts.push("High mastery means you'll reinforce quickly and maintain better");
     }
 
     return parts.join('. ');

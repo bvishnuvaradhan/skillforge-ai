@@ -333,7 +333,7 @@ export class ReflectionEngine {
       canSnooze: true,
       quality: 0,
       message:
-        'Once you have more learning activity, you'll receive detailed weekly reflections.'
+        "Once you have more learning activity, you'll receive detailed weekly reflections."
     };
   }
 
