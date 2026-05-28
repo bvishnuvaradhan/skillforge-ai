@@ -398,6 +398,48 @@ feat(phase5.5-5.6): Autonomous reinforcement & session intelligence
 
 **MentorPreferencesPanel.jsx**: User-facing settings UI
 - ✅ 3 tabs: Features, Intensity, Advanced
+
+---
+
+## 🛠 Developer Quickstart (Phase 5)
+
+Run tests and start services locally:
+
+- Run all backend tests (from repo root):
+
+  ```bash
+  npm test
+  ```
+
+- Start backend dev server:
+
+  ```bash
+  npm run dev --prefix backend
+  ```
+
+- Start frontend dev server:
+
+  ```bash
+  npm run dev --prefix frontend
+  ```
+
+If your backend runs on a different origin in development, set the frontend API base before the app boots (open browser console and set):
+
+```js
+window.__API_BASE_URL = 'http://localhost:3001'
+```
+
+To enable real AI responses (Claude/Anthropic):
+
+```bash
+npm install @anthropic-ai/sdk --prefix backend
+# then set ANTHROPIC_API_KEY in backend/.env
+```
+
+Notes:
+- Frontend fetches include `credentials: 'include'` so cookie-based auth is sent. Ensure authentication middleware and DB are running for end-to-end checks.
+- A simple backend test-runner is available at `backend/test-runner.js` and a lightweight unit test for the 'Why?' explain interaction is at `backend/test/why-interaction.test.js`.
+
 - ✅ Toggle buttons for each feature
 - ✅ Slider controls for intensity
 - ✅ Privacy and tracking toggles

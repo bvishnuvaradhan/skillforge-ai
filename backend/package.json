@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "test": "node test-runner.js",
     "build": "node -e \"console.log('No backend build step for JS sources')\"",
     "start": "node src/index.js",
     "typecheck": "node -e \"console.log('No backend typecheck for JS sources')\""
