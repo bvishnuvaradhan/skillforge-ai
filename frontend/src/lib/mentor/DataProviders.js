@@ -87,7 +87,7 @@ export class DataProviders {
 // Mock providers for development/testing
 export const MockDataProviders = {
   // Mock roadmap provider
-  roadmap: async (_userId, _params) => ({
+  roadmap: async () => ({
     nodes: [
       { id: 'arrays', name: 'Arrays', mastery: 0.85 },
       { id: 'sorting', name: 'Sorting', mastery: 0.72 },
@@ -108,7 +108,7 @@ export const MockDataProviders = {
   }),
 
   // Mock retention/heatmap provider
-  retention: async (_userId, _params) => ({
+  retention: async () => ({
     heatmap: {
       arrays: { daysSincePractice: 2, retentionRate: 0.92 },
       sorting: { daysSincePractice: 5, retentionRate: 0.78 },
@@ -126,7 +126,7 @@ export const MockDataProviders = {
   }),
 
   // Mock mastery provider
-  mastery: async (_userId, _params) => ({
+  mastery: async () => ({
     arrays: 0.85,
     sorting: 0.72,
     searching: 0.65,
@@ -136,7 +136,7 @@ export const MockDataProviders = {
   }),
 
   // Mock user DNA provider
-  dna: async (_userId, _params) => ({
+  dna: async () => ({
     type: 'Deep Diver',
     confidence: 0.82,
     description: 'You master topics through deep, focused exploration',
@@ -148,7 +148,7 @@ export const MockDataProviders = {
   }),
 
   // Mock forecast provider
-  forecast: async (_userId, _params) => ({
+  forecast: async () => ({
     predictions: {
       arrays: 0.88,
       sorting: 0.75,
@@ -163,7 +163,7 @@ export const MockDataProviders = {
   }),
 
   // Mock governance provider
-  governance: async (_userId, _params) => ({
+  governance: async () => ({
     policies: [
       { type: 'cooldown', active: false, durationDays: 1 },
       { type: 'readiness', active: true, masteryThreshold: 0.6 }
@@ -176,7 +176,7 @@ export const MockDataProviders = {
   }),
 
   // Mock activity provider
-  activity: async (_userId, _params) => ({
+  activity: async () => ({
     sessionsLastWeek: 4,
     problemsSolvedLastWeek: 28,
     averageSessionDuration: 45,
@@ -186,7 +186,7 @@ export const MockDataProviders = {
   }),
 
   // Mock recommendation history provider
-  recommendationHistory: async (_userId, _params) => ({
+  recommendationHistory: async () => ({
     recommendations: [
       { id: 'rec1', topic: 'sorting', accepted: true },
       { id: 'rec2', topic: 'graphs', accepted: false },

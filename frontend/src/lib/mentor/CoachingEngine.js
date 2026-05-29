@@ -101,7 +101,6 @@ export class CoachingEngine {
     }
 
     const sessionsPerWeek = recentActivity.sessionsLastWeek;
-    const _problemsPerSession = recentActivity.problemsSolvedLastWeek / Math.max(sessionsPerWeek, 1);
     const averageSessionMinutes = recentActivity.averageSessionDuration || 0;
 
     let insight = '';
