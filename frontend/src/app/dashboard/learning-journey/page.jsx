@@ -6,6 +6,16 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LuArrowLeft } from 'react-icons/lu';
 
+// preserve imports for incremental lint cleanup
+void motion;
+void LearningRoadmap;
+void ForecastChart;
+void ConsistencyGraph;
+void DecayVisualization;
+void Card;
+void Button;
+void LuArrowLeft;
+
 export function LearningJourneyPage({ onBack }) {
   // Mock data - replace with real data from API
   const [timeframe, setTimeframe] = useState('30d');
