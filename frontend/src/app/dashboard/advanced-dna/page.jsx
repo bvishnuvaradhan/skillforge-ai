@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { AdvancedSkillDNA } from '../components/dashboard/AdvancedSkillDNA';
 import { TrustAndStabilityIndicators } from '../components/dashboard/TrustAndStability';
 import { LuArrowLeft, LuDownload, LuShare2 } from 'react-icons/lu';
+import { Button } from '../../components/ui/Button';
 import { useRouter } from 'next/navigation';
 
 export function AdvancedSkillDNAPage() {
@@ -28,8 +29,8 @@ export function AdvancedSkillDNAPage() {
             <p className="text-sm opacity-60">Deep analysis including peer comparison and optimization recommendations</p>
           </div>
             <div className="flex gap-2">
-              <button className="text-xs px-2 py-1 rounded bg-white/5">Export</button>
-              <button className="text-xs px-2 py-1 rounded bg-white/5">Share</button>
+              <Button variant="secondary" icon={LuDownload} className="text-xs">Export</Button>
+              <Button variant="secondary" icon={LuShare2} className="text-xs">Share</Button>
             </div>
         </div>
       </div>
