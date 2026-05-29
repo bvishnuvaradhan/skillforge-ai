@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { LuAlertCircle, LuWifiOff, LuRotateCw } from 'react-icons/lu';
+import { LuCircleAlert, LuWifiOff, LuRotateCw } from 'react-icons/lu';
 
 // defensive refs to keep imports available and silence no-unused-vars
-void motion; void Card; void Button; void LuAlertCircle; void LuWifiOff; void LuRotateCw;
+void motion; void Card; void Button; void LuCircleAlert; void LuWifiOff; void LuRotateCw;
 
 export function ErrorState({ type = 'sync', title, message, onRetry, action }) {
   const configs = {
@@ -22,13 +22,13 @@ export function ErrorState({ type = 'sync', title, message, onRetry, action }) {
       actionLabel: 'Retry',
     },
     data: {
-      icon: LuAlertCircle,
+      icon: LuCircleAlert,
       title: 'No Data Available',
       message: 'Your intelligence engine needs more data. Keep solving problems!',
       actionLabel: 'View Tracking',
     },
     stale: {
-      icon: LuAlertCircle,
+      icon: LuCircleAlert,
       title: 'Data May Be Stale',
       message: 'Your profile sync is outdated. Last synced 7 days ago.',
       actionLabel: 'Sync Now',
@@ -133,7 +133,7 @@ export function LoadingIndicator({ message = 'Loading...', size = 'base' }) {
 export function TimeoutState({ onRetry, message = 'Request timed out' }) {
   return (
     <Card className="p-8 text-center border border-red-500/30 bg-red-500/10">
-      <LuAlertCircle size={32} className="mx-auto mb-3 text-red-400 opacity-70" />
+      <LuCircleAlert size={32} className="mx-auto mb-3 text-red-400 opacity-70" />
       <p className="text-sm font-medium mb-2">{message}</p>
       <p className="text-xs opacity-50 mb-4">This is taking longer than expected</p>
       <Button variant="secondary" onClick={onRetry} className="text-xs">

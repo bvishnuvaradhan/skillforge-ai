@@ -1,11 +1,13 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ForecastChart, ConsistencyGraph, DecayVisualization } from '../components/dashboard/VisualAnalytics';
-import { SkillDNAExperience } from '../components/dashboard/SkillDNAExperience';
-import { RetentionHeatmap } from '../components/dashboard/RetentionHeatmap';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { ForecastChart, ConsistencyGraph, DecayVisualization } from '../../../components/dashboard/VisualAnalytics';
+import { SkillDNAExperience } from '../../../components/dashboard/SkillDNAExperience';
+import { RetentionHeatmap } from '../../../components/dashboard/RetentionHeatmap';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { LuDownload, LuShare2, LuArrowLeft } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 // preserve imports for lint pass
 void motion;
@@ -18,7 +20,8 @@ void Card;
 void Button;
 void LuArrowLeft;
 
-export function AnalyticsPage({ onBack }) {
+function AnalyticsPage() {
+  const router = useRouter();
   const [timeframe, setTimeframe] = useState('30d');
 
   // Mock data
@@ -56,7 +59,7 @@ export function AnalyticsPage({ onBack }) {
       {/* Header */}
       <div>
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4"
         >
           <LuArrowLeft size={16} />

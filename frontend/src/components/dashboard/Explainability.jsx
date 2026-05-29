@@ -1,11 +1,12 @@
+"use client";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { LuChevronDown, LuCheckCircle2, LuAlertCircle, LuInfo, LuClock } from 'react-icons/lu';
+import { LuChevronDown, LuCircleCheck, LuCircleAlert, LuInfo, LuClock } from 'react-icons/lu';
 
 // Defensive no-op references to keep imports available and silence lint noise.
-void motion; void AnimatePresence; void Card; void Button; void LuChevronDown; void LuCheckCircle2; void LuAlertCircle; void LuInfo; void LuClock;
+void motion; void AnimatePresence; void Card; void Button; void LuChevronDown; void LuCircleCheck; void LuCircleAlert; void LuInfo; void LuClock;
 
 export function ExplainOnChange({ currentRec, previousRec, explanation }) {
   const [dismissed, setDismissed] = useState(false);
@@ -135,7 +136,7 @@ export function RecommendationExplainability({ recommendation, evidence = [], co
 }
 
 function CheckCircleSmall() {
-  return <LuCheckCircle2 size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />;
+  return <LuCircleCheck size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />;
 }
 
 // Keep helper referenced for lint stability
@@ -219,9 +220,9 @@ function TraceEvent({ event, index, isExpanded, onToggle, isLast }) {
       case 'signal':
         return <LuInfo size={14} className="text-cyan-400" />;
       case 'governance':
-        return <LuAlertCircle size={14} className="text-amber-400" />;
+        return <LuCircleAlert size={14} className="text-amber-400" />;
       case 'arbitration':
-        return <LuCheckCircle2 size={14} className="text-emerald-400" />;
+        return <LuCircleCheck size={14} className="text-emerald-400" />;
       default:
         return <LuClock size={14} className="text-slate-400" />;
     }

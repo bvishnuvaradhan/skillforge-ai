@@ -1,9 +1,10 @@
+"use client";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from './Card';
 import { Button } from './Button';
 import { InlineExplainButton } from '../mentor/InlineExplainButton';
-import { LuChevronDown, LuZap, LuGaugeCircle } from 'react-icons/lu';
+import { LuChevronDown, LuZap, LuGauge } from 'react-icons/lu';
 
 // defensive no-op refs for imports that linter may flag in different build passes
 void motion;
@@ -12,7 +13,7 @@ void Card;
 void Button;
 void InlineExplainButton;
 void LuChevronDown;
-void LuZap; void LuGaugeCircle;
+void LuZap; void LuGauge;
 
 export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete }) {
   const [expanded, setExpanded] = useState(false);

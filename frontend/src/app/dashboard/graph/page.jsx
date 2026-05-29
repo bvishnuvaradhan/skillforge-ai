@@ -1,9 +1,11 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { DependencyGraphExplorer } from '../components/dashboard/DependencyGraphExplorer';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { DependencyGraphExplorer } from '../../../components/dashboard/DependencyGraphExplorer';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { LuArrowLeft, LuDownload, LuInfo } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 // preserve imports (no-op) to avoid removing them during lint cleanup
 void motion;
@@ -14,7 +16,8 @@ void LuArrowLeft;
 void LuDownload;
 void LuInfo;
 
-export function DependencyGraphPage({ onBack }) {
+function DependencyGraphPage() {
+  const router = useRouter();
   const [selectedTopic, setSelectedTopic] = useState(null);
 
   return (
@@ -26,7 +29,7 @@ export function DependencyGraphPage({ onBack }) {
       {/* Header */}
       <div>
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4"
         >
           <LuArrowLeft size={16} />

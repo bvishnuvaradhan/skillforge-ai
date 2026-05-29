@@ -1,10 +1,12 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LearningRoadmap } from '../components/dashboard/LearningRoadmap';
-import { ForecastChart, ConsistencyGraph, DecayVisualization } from '../components/dashboard/VisualAnalytics';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { LearningRoadmap } from '../../../components/dashboard/LearningRoadmap';
+import { ForecastChart, ConsistencyGraph, DecayVisualization } from '../../../components/dashboard/VisualAnalytics';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { LuArrowLeft } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 // preserve imports for incremental lint cleanup
 void motion;
@@ -16,7 +18,8 @@ void Card;
 void Button;
 void LuArrowLeft;
 
-export function LearningJourneyPage({ onBack }) {
+function LearningJourneyPage() {
+  const router = useRouter();
   // Mock data - replace with real data from API
   const [timeframe, setTimeframe] = useState('30d');
   const mockTopics = [
@@ -74,7 +77,7 @@ export function LearningJourneyPage({ onBack }) {
       {/* Header */}
       <div>
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4"
         >
           <LuArrowLeft size={16} />

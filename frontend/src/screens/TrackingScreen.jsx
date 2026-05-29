@@ -7,10 +7,10 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
-import { LuGithub, LuCode, LuTrophy, LuRefreshCw, LuCheck, LuActivity, LuTrash2, LuZap, LuAlertTriangle } from "react-icons/lu";
+import { LuGithub, LuCode, LuTrophy, LuRefreshCw, LuCheck, LuActivity, LuTrash2, LuZap, LuTriangleAlert } from "react-icons/lu";
 
 // Defensive no-op references to keep imports present for future use and silence lint warnings
-void useState; void useEffect; void useAuth; void api; void Button; void Card; void Field; void SectionHeader; void LuGithub; void LuCode; void LuTrophy; void LuRefreshCw; void LuCheck; void LuActivity; void LuTrash2; void LuZap; void LuAlertTriangle;
+void useState; void useEffect; void useAuth; void api; void Button; void Card; void Field; void SectionHeader; void LuGithub; void LuCode; void LuTrophy; void LuRefreshCw; void LuCheck; void LuActivity; void LuTrash2; void LuZap; void LuTriangleAlert;
 
 export function TrackingScreen() {
   const { auth } = useAuth();
@@ -101,7 +101,7 @@ export function TrackingScreen() {
                         {profile.syncStatus === 'success' && <LuCheck size={14} color="var(--success)" />}
                         {profile.syncStatus === 'success_cached' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#FFA116' }}>
-                            <LuAlertTriangle size={14} title={profile.error} />
+                            <LuTriangleAlert size={14} title={profile.error} />
                             <span style={{ fontSize: '0.75rem' }}>cached</span>
                           </div>
                         )}

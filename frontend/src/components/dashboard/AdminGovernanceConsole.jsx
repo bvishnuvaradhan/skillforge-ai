@@ -1,13 +1,14 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { LuActivity, LuDatabaseBackup, LuSettings2, LuPlayCircle, LuAlertTriangle, LuBrain, LuCheckCircle, LuXCircle, LuAlertCircle } from 'react-icons/lu';
+import { LuActivity, LuDatabaseBackup, LuSettings2, LuPlay, LuTriangleAlert, LuBrain, LuCircleCheck, LuCircleX, LuCircleAlert } from 'react-icons/lu';
 import MentorTrustMetrics from '../../lib/mentor/MentorTrustMetrics';
 
 // Defensive no-op references to preserve imports/locals for future usage and
 // silence `no-unused-vars` warnings while keeping code available for later.
-void motion; void Card; void Button; void LuActivity; void LuDatabaseBackup; void LuSettings2; void LuPlayCircle; void LuAlertTriangle; void LuBrain; void LuCheckCircle; void LuXCircle; void LuAlertCircle; void MentorTrustMetrics;
+void motion; void Card; void Button; void LuActivity; void LuDatabaseBackup; void LuSettings2; void LuPlay; void LuTriangleAlert; void LuBrain; void LuCircleCheck; void LuCircleX; void LuCircleAlert; void MentorTrustMetrics;
 // Keep internal tab/component symbols referenced to avoid unused-var lint noise
 void OverviewTab; void MentorMetricsTab; void MetricDisplay; void FeatureRow; void EventsTab; void GovernanceTab; void ReplayTab; void EventCard; void PolicyCard;
 
@@ -20,7 +21,7 @@ export function AdminGovernanceConsole() {
     { id: 'mentor', label: 'Mentor Metrics', icon: LuBrain },
     { id: 'events', label: 'Events', icon: LuDatabaseBackup },
     { id: 'governance', label: 'Governance', icon: LuSettings2 },
-    { id: 'replay', label: 'Replay Tools', icon: LuPlayCircle },
+    { id: 'replay', label: 'Replay Tools', icon: LuPlay },
   ];
 
   return (
@@ -34,7 +35,7 @@ export function AdminGovernanceConsole() {
         <h1 className="text-4xl font-bold mb-2">Admin & Governance Console</h1>
         <p className="text-sm opacity-60">Operational visibility and control for SkillForge intelligence systems</p>
         <div className="mt-4 flex gap-2">
-          <Button variant="ghost" onClick={() => setShowReplayModal(true)} icon={LuPlayCircle}>
+          <Button variant="ghost" onClick={() => setShowReplayModal(true)} icon={LuPlay}>
             Open Replay Tools
           </Button>
           <Button variant="outline" onClick={() => alert('Export placeholder')} icon={LuDatabaseBackup}>
@@ -72,11 +73,11 @@ export function AdminGovernanceConsole() {
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-semibold">Replay Tools</h4>
             <div className="flex gap-2">
-              <LuCheckCircle className="text-emerald-400" />
-              <LuAlertTriangle className="text-amber-400" />
-              <LuXCircle className="text-rose-400" />
-              <LuAlertCircle className="text-yellow-400" />
-            </div>
+                <LuCircleCheck className="text-emerald-400" />
+                <LuTriangleAlert className="text-amber-400" />
+                <LuCircleX className="text-rose-400" />
+                <LuCircleAlert className="text-yellow-400" />
+              </div>
           </div>
           <p className="text-xs opacity-70 mb-3">Quick replay interface for recent traces. This is a lightweight placeholder used to exercise imported icons.</p>
           <div className="flex gap-2">
@@ -235,9 +236,9 @@ function MentorMetricsTab() {
       <Card className={`p-6 border-l-4 ${allCriteriaMet ? 'border-emerald-500 bg-emerald-500/10' : 'border-amber-500 bg-amber-500/10'}`}>
         <div className="flex gap-3 items-start">
           {allCriteriaMet ? (
-            <LuCheckCircle className="text-emerald-400 flex-shrink-0 mt-0.5" size={24} />
+            <LuCircleCheck className="text-emerald-400 flex-shrink-0 mt-0.5" size={24} />
           ) : (
-            <LuAlertCircle className="text-amber-400 flex-shrink-0 mt-0.5" size={24} />
+            <LuCircleAlert className="text-amber-400 flex-shrink-0 mt-0.5" size={24} />
           )}
           <div className="flex-1">
             <p className={`font-semibold ${allCriteriaMet ? 'text-emerald-300' : 'text-amber-300'}`}>
@@ -270,9 +271,9 @@ function MentorMetricsTab() {
                 </div>
                 <div className="flex-shrink-0">
                   {criterion.status === 'pass' ? (
-                    <LuCheckCircle className="text-emerald-400" size={20} />
+                    <LuCircleCheck className="text-emerald-400" size={20} />
                   ) : (
-                    <LuXCircle className="text-amber-400" size={20} />
+                    <LuCircleX className="text-amber-400" size={20} />
                   )}
                 </div>
               </div>
@@ -515,7 +516,7 @@ function GovernanceTab() {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <Card className="p-6 border-l-4 border-amber-500 bg-amber-500/10">
         <div className="flex gap-3 items-start">
-          <LuAlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={20} />
+          <LuTriangleAlert className="text-amber-400 flex-shrink-0 mt-0.5" size={20} />
           <div>
             <p className="font-semibold text-amber-300">Policy Warning</p>
             <p className="text-sm opacity-80 mt-1">Recommendation cooldown policy approaching daily limit (47/50 recommendations)</p>
@@ -586,7 +587,7 @@ function ReplayTab() {
             />
           </div>
           <Button variant="primary" className="w-full text-sm flex items-center justify-center gap-2">
-            <LuPlayCircle size={16} />
+            <LuPlay size={16} />
             Start Replay
           </Button>
         </div>

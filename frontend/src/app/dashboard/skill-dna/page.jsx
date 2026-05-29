@@ -1,8 +1,11 @@
+"use client";
+import React from 'react';
 import { motion } from 'framer-motion';
-import { SkillDNAExperience } from '../components/dashboard/SkillDNAExperience';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { SkillDNAExperience } from '../../../components/dashboard/SkillDNAExperience';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { LuArrowLeft, LuDownload } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 // preserve imports for incremental lint cleanup
 void motion;
@@ -12,7 +15,9 @@ void Button;
 void LuArrowLeft;
 void LuDownload;
 
-export function SkillDNAPage({ onBack }) {
+function SkillDNAPage() {
+  const router = useRouter();
+
   const mockDNAData = {
     type: 'Deep Diver',
     confidence: 0.82,
@@ -39,10 +44,7 @@ export function SkillDNAPage({ onBack }) {
     >
       {/* Header */}
       <div>
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4"
-        >
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4">
           <LuArrowLeft size={16} />
           Back to Dashboard
         </button>

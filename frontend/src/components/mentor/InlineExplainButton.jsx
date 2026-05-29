@@ -1,14 +1,15 @@
+"use client";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuHelpCircle, LuX } from 'react-icons/lu';
+import { LuCircleHelp, LuX } from 'react-icons/lu';
 
 // preserve imports for lint
 void motion;
 void AnimatePresence;
-void LuHelpCircle;
+void LuCircleHelp;
 void LuX;
-import { ExplainabilityEngine } from '../lib/mentor/ExplainabilityEngine';
-import { getConfidenceMetadata, getUncertaintyMetadata } from '../lib/mentor/types';
+import { ExplainabilityEngine } from '../../lib/mentor/ExplainabilityEngine';
+import { getConfidenceMetadata, getUncertaintyMetadata } from '../../lib/mentor/types';
 
 const explainabilityEngine = new ExplainabilityEngine();
 
@@ -89,10 +90,10 @@ export function InlineExplainButton({
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity }}
           >
-            <LuHelpCircle size={14} />
+            <LuCircleHelp size={14} />
           </motion.div>
         ) : (
-          <LuHelpCircle size={14} />
+          <LuCircleHelp size={14} />
         )}
         <span className="hidden sm:inline">{label}</span>
       </button>

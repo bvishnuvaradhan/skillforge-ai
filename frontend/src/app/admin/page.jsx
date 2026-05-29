@@ -1,5 +1,6 @@
+"use client";
 import { motion } from 'framer-motion';
-import { AdminGovernanceConsole } from '../components/dashboard/AdminGovernanceConsole';
+import { AdminGovernanceConsole } from '../../components/dashboard/AdminGovernanceConsole';
 import { LuArrowLeft, LuShield } from 'react-icons/lu';
 import { useRouter } from 'next/navigation';
 
@@ -9,7 +10,7 @@ void AdminGovernanceConsole;
 void LuArrowLeft;
 void LuShield;
 
-export function AdminConsolePage() {
+function AdminConsolePage() {
   const router = useRouter();
 
   return (

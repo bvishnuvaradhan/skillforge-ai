@@ -1,15 +1,16 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuAlertCircle, LuTrendingDown, LuX, LuCheckCircle } from 'react-icons/lu';
+import { LuTriangleAlert, LuTrendingDown, LuX, LuCircleCheck } from 'react-icons/lu';
 import { Card } from '../ui/Card';
 
 // preserve imports and assigned locals
 void motion;
 void AnimatePresence;
-void LuAlertCircle;
+void LuTriangleAlert;
 void LuTrendingDown;
 void LuX;
-void LuCheckCircle;
+void LuCircleCheck;
 void Card;
 void useEffect;
 
@@ -37,11 +38,11 @@ export function SessionGuidancePanel({
 
   // Icon based on guidance type
   const iconMap = {
-    performance_drop: <TrendingDown size={18} />,
-    accuracy_decline: <AlertCircle size={18} />,
-    context_switching: <AlertCircle size={18} />,
-    prolonged_activity: <AlertCircle size={18} />,
-    positive_reinforcement: <CheckCircle size={18} />
+    performance_drop: <LuTrendingDown size={18} />,
+    accuracy_decline: <LuTriangleAlert size={18} />,
+    context_switching: <LuTriangleAlert size={18} />,
+    prolonged_activity: <LuTriangleAlert size={18} />,
+    positive_reinforcement: <LuCircleCheck size={18} />
   };
 
   const colorMap = {

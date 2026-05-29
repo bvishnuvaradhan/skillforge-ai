@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';

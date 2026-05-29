@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { LuCheckCircle2, LuCircle, LuLock, LuArrowRight, LuStar } from 'react-icons/lu';
+import { LuCircleCheck, LuCircle, LuLock, LuArrowRight, LuStar } from 'react-icons/lu';
 
 // Preserve imports and silence linter while these UI pieces remain available.
-void React; void motion; void AnimatePresence; void Card; void Button; void LuCheckCircle2; void LuCircle; void LuLock; void LuArrowRight; void LuStar;
+void React; void motion; void AnimatePresence; void Card; void Button; void LuCircleCheck; void LuCircle; void LuLock; void LuArrowRight; void LuStar;
 
 export function LearningRoadmap({ topics = [], currentTopic = null, recommendedPath = [] }) {
   const [expandedTopic, setExpandedTopic] = React.useState(null);
@@ -84,7 +84,7 @@ export function LearningRoadmap({ topics = [], currentTopic = null, recommendedP
 function RoadmapNode({ topic, status, isRecommended, isExpanded, onToggle, recommended }) {
   const statusConfig = {
     mastered: {
-      icon: LuCheckCircle2,
+      icon: LuCircleCheck,
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10 border-emerald-500/30',
       label: 'Mastered',

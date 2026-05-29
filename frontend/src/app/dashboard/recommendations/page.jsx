@@ -1,10 +1,12 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { RecommendationCard } from '../components/ui/RecommendationCard';
-import { RecommendationExplainability, ExplainOnChange, TraceViewer, StabilityIndicator } from '../components/dashboard/Explainability';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { RecommendationCard } from '../../../components/ui/RecommendationCard';
+import { RecommendationExplainability, ExplainOnChange, TraceViewer, StabilityIndicator } from '../../../components/dashboard/Explainability';
+import { Card } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { LuArrowLeft, LuFilter } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 // preserve imports for incremental lint cleanup
 void motion;
@@ -18,7 +20,8 @@ void Button;
 void LuArrowLeft;
 void LuFilter;
 
-export function RecommendationsPage({ onBack }) {
+function RecommendationsPage() {
+  const router = useRouter();
   const [selectedRec, setSelectedRec] = useState(0);
   const [showTrace, setShowTrace] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -132,7 +135,7 @@ export function RecommendationsPage({ onBack }) {
       {/* Header */}
       <div>
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="flex items-center gap-2 text-sm opacity-50 hover:opacity-100 transition-opacity mb-4"
         >
           <LuArrowLeft size={16} />

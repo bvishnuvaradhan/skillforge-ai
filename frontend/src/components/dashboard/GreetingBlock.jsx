@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LuFirestarter, LuTrendingUp, LuZap } from 'react-icons/lu';
+import { LuFlame, LuTrendingUp, LuZap } from 'react-icons/lu';
 
 export function GreetingBlock({ userName, momentumScore, streak, energyLevel }) {
   const now = new Date().getHours();
@@ -17,13 +17,13 @@ export function GreetingBlock({ userName, momentumScore, streak, energyLevel }) 
   };
 
   const getMomentumIcon = () => {
-    if (momentumScore >= 80) return <LuFirestarter className="text-amber-400" size={20} />;
+    if (momentumScore >= 80) return <LuFlame className="text-amber-400" size={20} />;
     if (momentumScore >= 60) return <LuTrendingUp className="text-emerald-400" size={20} />;
     return <LuZap className="text-cyan-400" size={20} />;
   };
 
   // defensive no-op references to satisfy lint checks in some build environments
-  void motion; void LuFirestarter; void LuTrendingUp; void LuZap;
+  void motion; void LuFlame; void LuTrendingUp; void LuZap;
 
   return (
     <motion.div

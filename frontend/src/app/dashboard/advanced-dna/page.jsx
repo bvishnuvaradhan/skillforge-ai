@@ -1,8 +1,9 @@
+"use client";
 import { motion } from 'framer-motion';
-import { AdvancedSkillDNA } from '../components/dashboard/AdvancedSkillDNA';
-import { TrustAndStabilityIndicators } from '../components/dashboard/TrustAndStability';
+import { AdvancedSkillDNA } from '../../../components/dashboard/AdvancedSkillDNA';
+import { TrustAndStabilityIndicators } from '../../../components/dashboard/TrustAndStability';
 import { LuArrowLeft, LuDownload, LuShare2 } from 'react-icons/lu';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../../components/ui/Button';
 import { useRouter } from 'next/navigation';
 
 // Preserve imports during incremental lint cleanup
@@ -12,7 +13,7 @@ void TrustAndStabilityIndicators;
 void LuArrowLeft;
 void Button;
 
-export function AdvancedSkillDNAPage() {
+function AdvancedSkillDNAPage() {
   const router = useRouter();
 
   return (

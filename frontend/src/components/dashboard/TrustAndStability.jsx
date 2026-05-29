@@ -1,10 +1,11 @@
+"use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
-import { LuCheckCircle2, LuAlertCircle, LuTrendingUp, LuClock } from 'react-icons/lu';
+import { LuCircleCheck, LuCircleAlert, LuTrendingUp, LuClock } from 'react-icons/lu';
 
 // defensive refs for lint
-void motion; void Card; void LuCheckCircle2; void LuAlertCircle; void LuTrendingUp; void LuClock;
+void motion; void Card; void LuCircleCheck; void LuCircleAlert; void LuTrendingUp; void LuClock;
 
 export function TrustAndStabilityIndicators({ recommendation = {}, previousState = null }) {
   const [showDetails, setShowDetails] = useState(false);
@@ -46,7 +47,7 @@ export function TrustAndStabilityIndicators({ recommendation = {}, previousState
             <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Recommendation Stability</p>
             <h3 className="text-lg font-semibold">{rec.title}</h3>
           </div>
-          <motion.div
+            <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -120,7 +121,7 @@ export function TrustAndStabilityIndicators({ recommendation = {}, previousState
               description="This recommendation has remained stable for 2+ days"
             />
             <TrustReason
-              icon={<AlertCircle color="text-amber-400" />}
+              icon={<LuCircleAlert color="text-amber-400" />}
               title="Low Change Probability"
               description="Only 5% chance this will change in the next 7 days"
             />
@@ -181,7 +182,7 @@ function TrustReason({ icon, title, description }) {
 }
 
 function CheckCircle({ color }) {
-  return <LuCheckCircle2 size={18} className={color} />;
+  return <LuCircleCheck size={18} className={color} />;
 }
 
 export default TrustAndStabilityIndicators;
