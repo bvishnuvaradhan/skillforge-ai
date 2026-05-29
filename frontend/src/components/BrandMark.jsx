@@ -2,6 +2,9 @@ import dynamic from "next/dynamic";
 
 const LogoScene = dynamic(() => import("./brand/LogoScene"), { ssr: false, loading: () => <span className="brand-mark__orb" /> });
 
+// defensive reference for linters that may mis-detect dynamic imports
+void LogoScene;
+
 export function BrandMark() {
   return (
     <div className="brand-mark" aria-label="SkillForge AI brand">

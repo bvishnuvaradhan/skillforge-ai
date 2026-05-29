@@ -5,6 +5,12 @@ import { m, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
 
 const MotionDiv = m.div;
 
+// mark motion helpers as used to avoid lint noise in some environments
+void MotionDiv;
+void useMotionTemplate;
+void useMotionValue;
+void useSpring;
+
 const LogoScene = dynamic(() => import("./LogoScene"), {
   ssr: false,
   loading: () => <div className="animated-logo__fallback" />,

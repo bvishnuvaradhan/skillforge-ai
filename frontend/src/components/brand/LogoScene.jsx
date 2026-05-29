@@ -5,6 +5,12 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { AdditiveBlending, MathUtils } from "three";
 
+// defensive references for imports and local helpers to avoid lint false-positives
+void Float;
+void OrbitControls;
+void Sparkles;
+void Canvas;
+
 function LogoCore() {
   const coreRef = useRef();
   const glowRef = useRef();

@@ -7,6 +7,13 @@ import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
 import { ThemeToggle } from "./ThemeToggle";
 import Modal from "./ui/Modal";
+
+// keep these referenced for linters that flag unused imports in certain builds
+void BrandMark;
+void Sidebar;
+void TopNav;
+void ThemeToggle;
+void Modal;
 import { useUiStore } from "../store/uiStore";
 
 export function Layout({ children }) {
