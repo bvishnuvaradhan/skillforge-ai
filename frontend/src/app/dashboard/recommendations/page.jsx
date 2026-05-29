@@ -6,6 +6,18 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LuArrowLeft, LuFilter } from 'react-icons/lu';
 
+// preserve imports for incremental lint cleanup
+void motion;
+void RecommendationCard;
+void RecommendationExplainability;
+void ExplainOnChange;
+void TraceViewer;
+void StabilityIndicator;
+void Card;
+void Button;
+void LuArrowLeft;
+void LuFilter;
+
 export function RecommendationsPage({ onBack }) {
   const [selectedRec, setSelectedRec] = useState(0);
   const [showTrace, setShowTrace] = useState(false);

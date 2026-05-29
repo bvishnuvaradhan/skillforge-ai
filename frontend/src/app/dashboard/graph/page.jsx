@@ -5,6 +5,15 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { LuArrowLeft, LuDownload, LuInfo } from 'react-icons/lu';
 
+// preserve imports (no-op) to avoid removing them during lint cleanup
+void motion;
+void DependencyGraphExplorer;
+void Card;
+void Button;
+void LuArrowLeft;
+void LuDownload;
+void LuInfo;
+
 export function DependencyGraphPage({ onBack }) {
   const [selectedTopic, setSelectedTopic] = useState(null);
 
