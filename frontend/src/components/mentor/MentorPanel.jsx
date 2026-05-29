@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { ConversationalUI } from './ConversationalUI';
 import { MentorPreferencesPanel } from './MentorPreferencesPanel';
 import { LuMessageCircle, LuX, LuChevronDown, LuSettings } from 'react-icons/lu';
 import dataProviders from '../../lib/mentor/providers';
+import MentorIntegration from '../../lib/mentor/MentorIntegration';
 // preserve imports and assigned locals
 void motion;
 void AnimatePresence;
@@ -29,6 +30,8 @@ export function MentorPanel({
   const [showPreferences, setShowPreferences] = useState(false);
   const [roadmapStatus, setRoadmapStatus] = useState('unknown');
   const [roadmapSample, setRoadmapSample] = useState(null);
+  const [mentorInitStatus, setMentorInitStatus] = useState('idle');
+  const mentorIntegrationRef = useRef(null);
 
   // mark assigned-but-unused states as referenced to reduce lint noise
   void expanded;
@@ -58,6 +61,40 @@ export function MentorPanel({
           console.error('Roadmap fetch failed:', err);
           if (mounted) setRoadmapStatus('error');
         });
+    }
+
+    return () => { mounted = false; };
+  }, [isOpen, userId]);
+
+  // On open, initialize MentorIntegration in dev mode to validate end-to-end wiring
+  useEffect(() => {
+    let mounted = true;
+    const shouldInit = (process.env.NODE_ENV !== 'production');
+    if (isOpen && shouldInit) {
+      setMentorInitStatus('initializing');
+      try {
+        if (!mentorIntegrationRef.current) {
+          mentorIntegrationRef.current = new MentorIntegration(userId, dataProviders);
+        }
+
+        mentorIntegrationRef.current.initialize()
+          .then((result) => {
+            if (!mounted) return;
+            if (result && result.success) {
+              setMentorInitStatus('ready');
+            } else {
+              setMentorInitStatus('failed');
+              console.warn('MentorIntegration initialize returned:', result);
+            }
+          })
+          .catch((err) => {
+            console.error('MentorIntegration initialize error:', err);
+            if (mounted) setMentorInitStatus('error');
+          });
+      } catch (err) {
+        console.error('Failed to construct MentorIntegration:', err);
+        if (mounted) setMentorInitStatus('error');
+      }
     }
 
     return () => { mounted = false; };
@@ -197,6 +234,7 @@ export function MentorPanel({
               {roadmapSample && (
                 <div className="mt-1 text-[10px] opacity-70">Sample: {roadmapSample.nodes.length} nodes</div>
               )}
+              <div className="mt-1">Mentor init: <span className={`font-medium ${mentorInitStatus === 'ready' ? 'text-emerald-400' : mentorInitStatus === 'initializing' ? 'text-yellow-300' : 'text-amber-400'}`}>{mentorInitStatus}</span></div>
             </div>
           </div>
         </div>
