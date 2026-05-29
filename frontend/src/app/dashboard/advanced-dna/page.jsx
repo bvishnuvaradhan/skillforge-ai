@@ -1,9 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { AdvancedSkillDNA } from '../components/dashboard/AdvancedSkillDNA';
 import { TrustAndStabilityIndicators } from '../components/dashboard/TrustAndStability';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { LuArrowLeft, LuDownload, LuShare2 } from 'react-icons/lu';
 import { useRouter } from 'next/navigation';
 
@@ -30,14 +27,10 @@ export function AdvancedSkillDNAPage() {
             <h1 className="text-4xl font-bold mb-2">Advanced Skill DNA Profile</h1>
             <p className="text-sm opacity-60">Deep analysis including peer comparison and optimization recommendations</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" icon={LuDownload} className="text-xs">
-              Export
-            </Button>
-            <Button variant="secondary" icon={LuShare2} className="text-xs">
-              Share
-            </Button>
-          </div>
+            <div className="flex gap-2">
+              <button className="text-xs px-2 py-1 rounded bg-white/5">Export</button>
+              <button className="text-xs px-2 py-1 rounded bg-white/5">Share</button>
+            </div>
         </div>
       </div>
 
@@ -47,9 +40,9 @@ export function AdvancedSkillDNAPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       >
-        <Card depth="level2" className="p-8">
+        <div className="p-8">
           <AdvancedSkillDNA />
-        </Card>
+        </div>
       </motion.div>
 
       {/* Trust & Stability */}
@@ -60,7 +53,7 @@ export function AdvancedSkillDNAPage() {
       >
         <div>
           <h2 className="text-2xl font-semibold mb-6">Trust & Stability Analysis</h2>
-          <Card depth="level2" className="p-6">
+          <div className="p-6">
             <TrustAndStabilityIndicators
               recommendation={{
                 title: 'Practice: Dynamic Programming - Coin Change',
@@ -69,7 +62,7 @@ export function AdvancedSkillDNAPage() {
                 predictability: 0.92,
               }}
             />
-          </Card>
+          </div>
         </div>
       </motion.div>
 
@@ -79,14 +72,12 @@ export function AdvancedSkillDNAPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.2 }}
       >
-        <Card depth="level2" className="p-6 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 relative overflow-hidden">
+        <div className="p-6 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-purple-400/10 rounded-full blur-2xl -z-1" />
           <h3 className="text-lg font-semibold mb-3 relative z-10">Export Your Profile</h3>
           <p className="text-sm opacity-70 mb-4 relative z-10">Download your complete Skill DNA profile, learning history, and optimization recommendations</p>
-          <Button variant="secondary" className="text-sm relative z-10">
-            Download as PDF Report
-          </Button>
-        </Card>
+          <button className="text-sm px-3 py-2 rounded bg-white/5 relative z-10">Download as PDF Report</button>
+        </div>
       </motion.div>
     </motion.section>
   );
