@@ -241,7 +241,7 @@ export class CoachingEngine {
 
   // Select which topics to focus on today
   selectFocusTopics(context) {
-    const { forecast, mastery, recentActivity } = context;
+    const { forecast, mastery: _mastery, recentActivity } = context;
 
     const topics = [];
 
