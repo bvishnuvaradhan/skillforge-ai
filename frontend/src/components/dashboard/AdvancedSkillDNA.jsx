@@ -4,12 +4,19 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import {
   RadarChart, Radar, LineChart, Line, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import { LuTrendingUp, LuUsers, LuZap, LuTarget } from 'react-icons/lu';
 
 export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
   const [compareWith, setCompareWith] = useState('average');
+
+  const sampleRadarData = [
+    { subject: 'Syntax', A: 120, B: 110, fullMark: 150 },
+    { subject: 'Algorithms', A: 98, B: 130, fullMark: 150 },
+    { subject: 'Systems', A: 86, B: 99, fullMark: 150 },
+  ];
 
   const mockUserDNA = {
     type: 'Deep Diver',
@@ -209,7 +216,6 @@ function TraitCard({ label, value, icon: Icon }) {
   );
 }
 
-export const PolarGrid = ({ stroke }) => <g></g>;
-export const PolarAngleAxis = ({ dataKey, tick }) => <g></g>;
+// using Recharts Polar components directly (imports above)
 
 export default AdvancedSkillDNA;
