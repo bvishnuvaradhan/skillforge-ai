@@ -59,6 +59,9 @@ export class ReinforcementPlanner {
   identifyAtRiskTopics(context) {
     const { retention, forecast, mastery } = context;
 
+    // reference forecast when not currently used to silence lint warnings
+    void forecast;
+
     if (!retention || !retention.heatmap) {
       return [];
     }
@@ -295,6 +298,9 @@ export class ReinforcementPlanner {
     // Track which bundles work well
     // In real implementation, this would update effectiveness metrics
     // For now, just store in history
+    // avoid unused param warnings until this is implemented
+    void bundleId;
+    void effective;
   }
 
   // Recommend session duration

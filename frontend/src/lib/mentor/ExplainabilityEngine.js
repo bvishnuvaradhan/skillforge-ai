@@ -55,6 +55,10 @@ export class ExplainabilityEngine {
   explainRecommendation(context) {
     const { recommendation, userData, mastery, dependencies } = context;
 
+    // reference optional locals to avoid lint warnings when unused
+    void userData;
+    void mastery;
+
     const dataPoints = [];
     const confidence = this.calculateConfidence(context);
     const uncertainty = this.calculateUncertainty(context);
@@ -253,6 +257,9 @@ export class ExplainabilityEngine {
   explainGovernance(context) {
     const { policyType, reason, affectedRecommendation } = context;
 
+    // avoid unused var warning for optional affectedRecommendation
+    void affectedRecommendation;
+
     const explanations = {
       cooldown: `This recommendation is on cooldown to prevent over-learning the same topic too quickly. Spaced repetition is more effective than massed practice.`,
       readiness: `This recommendation requires higher mastery of prerequisites. Build foundation first, then tackle this.`,
@@ -362,6 +369,9 @@ export class ExplainabilityEngine {
 
   // Helper: Generate alternative explanations
   generateAlternatives(context) {
+    // keep context param available for future alternatives generation
+    void context;
+
     return [
       'Focus on different topic',
       'Reinforce previous topic',

@@ -295,6 +295,9 @@ Respond naturally, as a supportive mentor, while following the personality and r
 
   // Generate alternative suggestions
   generateAlternatives(context) {
+    // keep context param for future use and avoid unused-param lint warning
+    void context;
+
     return [
       'Try a different topic first',
       'Focus on reinforcement instead',
