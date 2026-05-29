@@ -4,6 +4,7 @@ import { Card } from '../ui/Card';
 import { ConversationalUI } from './ConversationalUI';
 import { MentorPreferencesPanel } from './MentorPreferencesPanel';
 import { LuMessageCircle, LuX, LuChevronDown, LuSettings } from 'react-icons/lu';
+import dataProviders from '../../lib/mentor/providers';
 // preserve imports and assigned locals
 void motion;
 void AnimatePresence;
@@ -26,6 +27,8 @@ export function MentorPanel({
   const [expanded, setExpanded] = useState(!compact);
   const [mentorResponse, setMentorResponse] = useState(null);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [roadmapStatus, setRoadmapStatus] = useState('unknown');
+  const [roadmapSample, setRoadmapSample] = useState(null);
 
   // mark assigned-but-unused states as referenced to reduce lint noise
   void expanded;
@@ -35,6 +38,30 @@ export function MentorPanel({
   const handleResponse = (response) => {
     setMentorResponse(response);
   };
+
+  // On open, do a minimal fetch to validate DataProviders/API wiring (cookies included)
+  useEffect(() => {
+    let mounted = true;
+    if (isOpen) {
+      setRoadmapStatus('loading');
+      dataProviders.fetch('roadmap', userId)
+        .then((res) => {
+          if (!mounted) return;
+          if (res && (res.nodes || res.nodes === 0)) {
+            setRoadmapStatus('ok');
+            setRoadmapSample({ nodes: (res.nodes || []).slice(0, 3) });
+          } else {
+            setRoadmapStatus('no-data');
+          }
+        })
+        .catch((err) => {
+          console.error('Roadmap fetch failed:', err);
+          if (mounted) setRoadmapStatus('error');
+        });
+    }
+
+    return () => { mounted = false; };
+  }, [isOpen, userId]);
 
   if (compact && !isOpen) {
     return null;
@@ -163,7 +190,15 @@ export function MentorPanel({
 
         {/* Info footer */}
         <div className="p-3 border-t border-white/10 bg-white/5 text-xs opacity-70">
-          <p>I have access to your learning data, roadmap, mastery levels, and governance policies. All conversations are private and auditable.</p>
+          <div className="flex items-center justify-between">
+            <p>I have access to your learning data, roadmap, mastery levels, and governance policies. All conversations are private and auditable.</p>
+            <div className="text-right text-[11px] opacity-80">
+              <div>Roadmap: <span className={`font-medium ${roadmapStatus === 'ok' ? 'text-emerald-400' : roadmapStatus === 'loading' ? 'text-yellow-300' : 'text-amber-400'}`}>{roadmapStatus}</span></div>
+              {roadmapSample && (
+                <div className="mt-1 text-[10px] opacity-70">Sample: {roadmapSample.nodes.length} nodes</div>
+              )}
+            </div>
+          </div>
         </div>
       </Card>
     </motion.div>
