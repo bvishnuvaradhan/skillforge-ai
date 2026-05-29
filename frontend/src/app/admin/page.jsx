@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { AdminGovernanceConsole } from '../components/dashboard/AdminGovernanceConsole';
-import { Button } from '../components/ui/Button';
 import { LuArrowLeft, LuShield } from 'react-icons/lu';
 import { useRouter } from 'next/navigation';
 
