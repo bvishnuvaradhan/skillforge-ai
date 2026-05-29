@@ -4,6 +4,13 @@ import { Suspense, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, Sparkles } from "@react-three/drei";
 
+// Intentionally reference imports to avoid removing them during lint cleanup
+void Suspense;
+void Canvas;
+void Float;
+void OrbitControls;
+void Sparkles;
+
 function Orb({ position, color, scale = 1 }) {
   const meshRef = useRef();
 

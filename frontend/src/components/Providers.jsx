@@ -3,6 +3,10 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { AuthProvider } from "../context/AuthContext";
 import { useAuth } from "../context/useAuth";
 
+// No-op references to ensure these imports are retained during lint cleanup
+void ThemeProvider;
+void AuthProvider;
+
 function ThemeSync() {
   const { theme, setTheme } = useTheme();
   const { auth } = useAuth();

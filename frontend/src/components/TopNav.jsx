@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// keep Link import referenced for incremental linting
+void Link;
+
 const LINKS = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
