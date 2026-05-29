@@ -66,10 +66,13 @@ export function MentorPanel({
     return () => { mounted = false; };
   }, [isOpen, userId]);
 
-  // On open, initialize MentorIntegration in dev mode to validate end-to-end wiring
+  // On open, optionally initialize MentorIntegration when `NEXT_PUBLIC_MENTOR_INIT_CHECK` is enabled
+  // You can override at runtime via `window.__MENTOR_INIT_CHECK = true` in the browser console.
   useEffect(() => {
     let mounted = true;
-    const shouldInit = (process.env.NODE_ENV !== 'production');
+    const envFlag = typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_MENTOR_INIT_CHECK === 'true';
+    const windowOverride = typeof window !== 'undefined' && (window.__MENTOR_INIT_CHECK === true || window.__MENTOR_INIT_CHECK === 'true');
+    const shouldInit = Boolean(envFlag || windowOverride);
     if (isOpen && shouldInit) {
       setMentorInitStatus('initializing');
       try {
