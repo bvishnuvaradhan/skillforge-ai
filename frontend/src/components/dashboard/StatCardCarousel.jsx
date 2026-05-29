@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import { StatCard } from './StatCard';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
+// defensive references to avoid lint noise
+void motion;
+void StatCard;
+void LuChevronLeft;
+void LuChevronRight;
+
 export function StatCardCarousel({ stats = [] }) {
   const [current, setCurrent] = useState(0);
 

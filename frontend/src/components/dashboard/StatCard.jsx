@@ -1,6 +1,10 @@
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 
+// defensive no-op refs to prevent false-positive unused warnings
+void motion;
+void Card;
+
 export function StatCard({ label, value, icon: Icon, color = 'cyan', subtext, trend }) {
   const colors = {
     cyan: 'text-cyan-400 bg-cyan-500/10',

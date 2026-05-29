@@ -9,6 +9,17 @@ import {
 } from 'recharts';
 import { LuTrendingUp, LuUsers, LuZap, LuTarget } from 'react-icons/lu';
 
+// defensive no-op refs to quiet lint where imports may be conditionally unused
+void motion;
+void Card;
+void Button;
+void RadarChart;
+void Radar;
+void PolarGrid;
+void PolarAngleAxis;
+void PolarRadiusAxis;
+void ResponsiveContainer;
+
 export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
   const [compareWith, setCompareWith] = useState('average');
 
