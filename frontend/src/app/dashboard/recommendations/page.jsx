@@ -131,20 +131,25 @@ export function RecommendationsPage({ onBack }) {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2">
-        {['all', 'active', 'reinforcing', 'exploring'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded text-xs font-medium transition-all capitalize ${
-              filter === f
-                ? 'bg-cyan-500 text-white'
-                : 'bg-white/5 hover:bg-white/10 text-white/70'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      <div className="flex gap-2 items-center">
+        <Button variant="ghost" icon={LuFilter} className="text-xs">
+          Filter
+        </Button>
+        <div className="flex gap-2">
+          {['all', 'active', 'reinforcing', 'exploring'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded text-xs font-medium transition-all capitalize ${
+                filter === f
+                  ? 'bg-cyan-500 text-white'
+                  : 'bg-white/5 hover:bg-white/10 text-white/70'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Layout: Cards on left, details on right */}
