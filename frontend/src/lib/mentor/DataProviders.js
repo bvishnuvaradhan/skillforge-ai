@@ -242,17 +242,23 @@ export class APIDataProviders {
 }
 
 // Factory function to create initialized DataProviders
-export function createDataProviders(useMock = true, apiBaseUrl = '') {
+export function createDataProviders(useMock, apiBaseUrl = '') {
   const providers = new DataProviders();
 
-  if (useMock) {
+  // Determine default behavior:
+  // - If `useMock` explicitly provided, honor it.
+  // - Else, prefer real API in production and allow opt-in via NEXT_PUBLIC_USE_MOCK.
+  const envPrefersMock = typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+  const defaultUseMock = typeof useMock === 'boolean' ? useMock : (process.env.NODE_ENV === 'development' ? envPrefersMock : false);
+
+  if (defaultUseMock) {
     // Register mock providers
     Object.entries(MockDataProviders).forEach(([name, provider]) => {
       providers.registerProvider(name, provider);
     });
   } else {
     // Ensure apiBaseUrl is a string ('' means same-origin)
-    const base = apiBaseUrl || '';
+    const base = apiBaseUrl || (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE) || '';
     const api = new APIDataProviders(base);
     providers.registerProvider('roadmap', api.roadmap);
     providers.registerProvider('retention', api.retention);
