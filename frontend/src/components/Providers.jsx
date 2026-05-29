@@ -31,3 +31,5 @@ export function Providers({ children }) {
     </ThemeProvider>
   );
 }
+
+export default Providers;
