@@ -46,7 +46,7 @@ export class CoachingEngine {
 
   // Analyze learning strategy effectiveness
   analyzeStrategy(context) {
-    const { userDNA, recentActivity, mastery } = context;
+    const { userDNA } = context;
 
     if (!userDNA) return null;
 
@@ -94,14 +94,14 @@ export class CoachingEngine {
 
   // Analyze learning pace and pacing recommendations
   analyzePacing(context) {
-    const { recentActivity, mastery, forecast } = context;
+    const { recentActivity } = context;
 
     if (!recentActivity || recentActivity.sessionsLastWeek === 0) {
       return null;
     }
 
     const sessionsPerWeek = recentActivity.sessionsLastWeek;
-    const problemsPerSession = recentActivity.problemsSolvedLastWeek / Math.max(sessionsPerWeek, 1);
+    const _problemsPerSession = recentActivity.problemsSolvedLastWeek / Math.max(sessionsPerWeek, 1);
     const averageSessionMinutes = recentActivity.averageSessionDuration || 0;
 
     let insight = '';
@@ -141,7 +141,7 @@ export class CoachingEngine {
 
   // Detect burnout patterns
   analyzeBurnout(context) {
-    const { recentActivity, mastery, forecast } = context;
+    const { recentActivity, forecast } = context;
 
     if (!recentActivity) return null;
 
@@ -220,7 +220,7 @@ export class CoachingEngine {
 
   // Plan today's optimal session
   planTodaySession(context, availableMinutes) {
-    const { mastery, userDNA, recentActivity, forecast } = context;
+    const { userDNA } = context;
 
     // Get focus topics (topics needing reinforcement or new topics ready)
     const focusTopics = this.selectFocusTopics(context);
