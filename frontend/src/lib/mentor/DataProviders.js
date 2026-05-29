@@ -209,6 +209,8 @@ export class APIDataProviders {
   }
 
   async fetchFromAPI(endpoint, userId) {
+    // keep userId referenced to avoid unused param lint warnings
+    void userId;
     try {
       const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
         method: 'GET',

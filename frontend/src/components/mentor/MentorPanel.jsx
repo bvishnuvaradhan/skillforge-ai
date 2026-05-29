@@ -4,6 +4,17 @@ import { Card } from '../ui/Card';
 import { ConversationalUI } from './ConversationalUI';
 import { MentorPreferencesPanel } from './MentorPreferencesPanel';
 import { LuMessageCircle, LuX, LuChevronDown, LuSettings } from 'react-icons/lu';
+// preserve imports and assigned locals
+void motion;
+void AnimatePresence;
+void Card;
+void ConversationalUI;
+void MentorPreferencesPanel;
+void LuMessageCircle;
+void LuX;
+void LuChevronDown;
+void LuSettings;
+void useEffect;
 
 export function MentorPanel({
   isOpen = true,

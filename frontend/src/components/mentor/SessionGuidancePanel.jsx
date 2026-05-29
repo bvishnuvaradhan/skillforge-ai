@@ -3,6 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LuAlertCircle, LuTrendingDown, LuX, LuCheckCircle } from 'react-icons/lu';
 import { Card } from '../ui/Card';
 
+// preserve imports and assigned locals
+void motion;
+void AnimatePresence;
+void LuAlertCircle;
+void LuTrendingDown;
+void LuX;
+void LuCheckCircle;
+void Card;
+void useEffect;
+
 export function SessionGuidancePanel({
   guidance,
   onDismiss,

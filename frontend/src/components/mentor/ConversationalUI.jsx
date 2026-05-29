@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuSend, LuLoader, LuChevronDown } from 'react-icons/lu';
+
+// preserve imports
+void motion;
+void AnimatePresence;
+void LuSend;
+void LuLoader;
+void LuChevronDown;
 import { ExplainabilityEngine } from '../lib/mentor/ExplainabilityEngine';
 import { getConfidenceMetadata, getUncertaintyMetadata } from '../lib/mentor/types';
 

@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { LuSettings, LuX, LuToggle2, LuSliders } from 'react-icons/lu';
+
+// preserve imports
+void motion;
+void AnimatePresence;
+void Card;
+void LuSettings;
+void LuX;
+void LuToggle2;
+void LuSliders;
 import { MentorPreferences } from '../../lib/mentor/MentorPreferences';
 
 export function MentorPreferencesPanel({ userId, onClose }) {

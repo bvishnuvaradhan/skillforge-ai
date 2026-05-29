@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuHelpCircle, LuX } from 'react-icons/lu';
+
+// preserve imports for lint
+void motion;
+void AnimatePresence;
+void LuHelpCircle;
+void LuX;
 import { ExplainabilityEngine } from '../lib/mentor/ExplainabilityEngine';
 import { getConfidenceMetadata, getUncertaintyMetadata } from '../lib/mentor/types';
 

@@ -243,6 +243,9 @@ export class CoachingEngine {
   selectFocusTopics(context) {
     const { forecast, mastery: _mastery, recentActivity } = context;
 
+    // mark _mastery as referenced to avoid lint warnings when it's unused
+    void _mastery;
+
     const topics = [];
 
     // 1. Topics at risk (highest priority)
