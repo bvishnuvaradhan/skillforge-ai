@@ -8,6 +8,7 @@ import { LuArrowLeft } from 'react-icons/lu';
 
 export function LearningJourneyPage({ onBack }) {
   // Mock data - replace with real data from API
+  const [timeframe, setTimeframe] = useState('30d');
   const mockTopics = [
     {
       id: '1',
@@ -130,6 +131,21 @@ export function LearningJourneyPage({ onBack }) {
         </motion.div>
       </div>
 
+      {/* Timeframe Selector */}
+      <div className="flex gap-2">
+        {['7d', '30d', '90d', 'All'].map((period) => (
+          <button
+            key={period}
+            onClick={() => setTimeframe(period)}
+            className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+              timeframe === period ? 'bg-cyan-500 text-white' : 'bg-white/5 hover:bg-white/10 text-white/70'
+            }`}
+          >
+            {period}
+          </button>
+        ))}
+      </div>
+
       {/* Visual Analytics Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -139,7 +155,7 @@ export function LearningJourneyPage({ onBack }) {
         <h2 className="text-2xl font-semibold mb-6">Your Growth Analytics</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card depth="level2" className="p-6">
-            <ForecastChart title="Mastery Forecast" timeframe="30 days" />
+            <ForecastChart title="Mastery Forecast" timeframe={timeframe} />
           </Card>
           <Card depth="level2" className="p-6">
             <ConsistencyGraph title="Weekly Activity" />
