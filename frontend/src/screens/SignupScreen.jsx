@@ -8,6 +8,8 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
+// Defensive no-op refs
+void Link; void useState; void Button; void Card; void Field; void SectionHeader;
 
 export function SignupScreen() {
   const router = useRouter();

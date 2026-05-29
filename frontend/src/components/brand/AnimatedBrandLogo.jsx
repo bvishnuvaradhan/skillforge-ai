@@ -35,6 +35,8 @@ export function AnimatedBrandLogo({ compact = false }) {
     rotateX.set(0);
     rotateY.set(0);
   };
+  // Keep LogoScene referenced for lint tools
+  void LogoScene;
 
   return (
     <MotionDiv

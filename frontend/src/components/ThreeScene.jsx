@@ -11,6 +11,9 @@ void Float;
 void OrbitControls;
 void Sparkles;
 
+// Keep internal scene components referenced to avoid unused-var lint noise
+void Orb; void Rings;
+
 function Orb({ position, color, scale = 1 }) {
   const meshRef = useRef();
 

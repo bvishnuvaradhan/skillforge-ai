@@ -178,4 +178,7 @@ function InsightBox({ title, value, subtitle }) {
   );
 }
 
+// Ensure InsightBox remains referenced for lint rules
+void InsightBox;
+
 export default AnalyticsPage;

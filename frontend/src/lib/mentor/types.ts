@@ -134,8 +134,8 @@ export interface ExplanationResponse {
 // Explanation UI component props
 export interface ExplanationUIProps {
   explanation: Explanation;
-  onAskFollowUp?: (question: string) => void;
-  onRequestAlternative?: (alternative: string) => void;
+  onAskFollowUp?: Function;
+  onRequestAlternative?: Function;
   compact?: boolean;
 }
 

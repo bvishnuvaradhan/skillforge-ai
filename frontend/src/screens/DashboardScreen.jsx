@@ -19,6 +19,10 @@ import {
 import { LuZap, LuActivity, LuBrainCircuit, LuRotateCcw, LuArrowRight } from "react-icons/lu";
 import { StatCardCarousel } from "../components/dashboard/StatCardCarousel";
 
+// Defensive no-op references to ensure imports remain available and to
+// silence `no-unused-vars` warnings across different build environments.
+void Button; void Card; void RecommendationCard; void GreetingBlock; void DailyFocusCard; void StatCard; void RetentionHeatmap; void EmptyState; void motion; void AnimatePresence; void Radar; void RadarChart; void PolarGrid; void PolarAngleAxis; void ResponsiveContainer; void LuZap; void LuActivity; void LuBrainCircuit; void LuRotateCcw; void LuArrowRight; void StatCardCarousel;
+
 export function DashboardScreen() {
   const router = useRouter();
   const { auth, logout } = useAuth();

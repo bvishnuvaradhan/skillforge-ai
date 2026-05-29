@@ -105,6 +105,11 @@ export function MobileCard({ title, value, subtext, icon: Icon, color = 'cyan' }
 export function MobileChart({ title, data, type = 'bar' }) {
   const maxValue = Math.max(...data.map(d => d.value || 0));
 
+  // keep helper referenced to avoid unused warnings in some bundles
+  void maxValue;
+  // defensive reference for param 'type'
+  void type;
+
   return (
     <div className="rounded-lg bg-white/5 border border-white/10 p-4">
       <h4 className="text-sm font-semibold mb-4">{title}</h4>

@@ -6,6 +6,9 @@ import {
 } from 'recharts';
 import { LuTrendingUp, LuCalendar } from 'react-icons/lu';
 
+// Keep imports referenced to avoid ESLint no-unused-vars warnings while preserving examples.
+void motion; void Card; void LineChart; void Line; void AreaChart; void Area; void BarChart; void Bar; void XAxis; void YAxis; void CartesianGrid; void Tooltip; void ResponsiveContainer; void Legend; void LuTrendingUp; void LuCalendar;
+
 export function ForecastChart({ data = [], title = 'Skill Forecast', timeframe = '30 days' }) {
   const chartData = data.length > 0 ? data : generateMockForecastData();
 

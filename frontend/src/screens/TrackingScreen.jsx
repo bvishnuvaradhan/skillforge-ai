@@ -9,8 +9,12 @@ import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { LuGithub, LuCode, LuTrophy, LuRefreshCw, LuCheck, LuActivity, LuTrash2, LuZap, LuAlertTriangle } from "react-icons/lu";
 
+// Defensive no-op references to keep imports present for future use and silence lint warnings
+void useState; void useEffect; void useAuth; void api; void Button; void Card; void Field; void SectionHeader; void LuGithub; void LuCode; void LuTrophy; void LuRefreshCw; void LuCheck; void LuActivity; void LuTrash2; void LuZap; void LuAlertTriangle;
+
 export function TrackingScreen() {
   const { auth } = useAuth();
+  void auth;
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState({});

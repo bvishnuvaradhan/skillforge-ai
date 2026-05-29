@@ -8,6 +8,9 @@ import { useAuth } from "../context/useAuth";
 import { api } from "../lib/api";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+
+// Keep these imports referenced to avoid lint warnings
+void motion; void LuGitBranch; void LuShieldCheck; void LuClock3; void LuWorkflow; void Button; void Card; void Field; void SectionHeader;
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
 

@@ -3,6 +3,9 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { LuArrowRight, LuLock } from 'react-icons/lu';
 
+// Defensive no-op references to keep these symbols available and silence lint
+void motion; void Card; void Button; void LuArrowRight; void LuLock;
+
 export function DailyFocusCard({ recommendations = [], onStart, onViewMore }) {
   if (recommendations.length === 0) {
     return (

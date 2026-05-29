@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/useAuth";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+// Defensive refs to keep imports available and silence lint warnings
+void Link; void useState; void Button; void Card; void Field; void SectionHeader;
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
 

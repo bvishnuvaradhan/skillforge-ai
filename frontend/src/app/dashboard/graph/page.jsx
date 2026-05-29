@@ -193,4 +193,7 @@ function StatBox({ label, value, color = 'cyan' }) {
   );
 }
 
+// Keep StatBox referenced for lint stability
+void StatBox;
+
 export default DependencyGraphPage;

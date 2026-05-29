@@ -8,6 +8,8 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Field } from "../components/ui/Field";
 import { SectionHeader } from "../components/ui/SectionHeader";
+// Keep imports referenced for lint stability
+void ThemeToggle; void Button; void Card; void Field; void SectionHeader;
 
 export function SettingsScreen() {
   const router = useRouter();

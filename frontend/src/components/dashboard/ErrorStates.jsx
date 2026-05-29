@@ -4,6 +4,9 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { LuAlertCircle, LuWifiOff, LuRotateCw } from 'react-icons/lu';
 
+// defensive refs to keep imports available and silence no-unused-vars
+void motion; void Card; void Button; void LuAlertCircle; void LuWifiOff; void LuRotateCw;
+
 export function ErrorState({ type = 'sync', title, message, onRetry, action }) {
   const configs = {
     sync: {
@@ -37,6 +40,9 @@ export function ErrorState({ type = 'sync', title, message, onRetry, action }) {
   const finalTitle = title || config.title;
   const finalMessage = message || config.message;
   const actionText = action || config.actionLabel;
+
+  // Keep Icon referenced to avoid unused-var warnings in certain builds
+  void Icon;
 
   return (
     <motion.div

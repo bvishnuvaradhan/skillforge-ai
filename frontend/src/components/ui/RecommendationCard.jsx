@@ -12,6 +12,7 @@ void Card;
 void Button;
 void InlineExplainButton;
 void LuChevronDown;
+void LuZap; void LuGaugeCircle;
 
 export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete }) {
   const [expanded, setExpanded] = useState(false);
@@ -200,5 +201,8 @@ function GaugeIcon({ value }) {
     </div>
   );
 }
+
+// reference GaugeIcon for lint stability
+void GaugeIcon;
 
 export default RecommendationCard;

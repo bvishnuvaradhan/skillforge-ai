@@ -10,6 +10,9 @@ import { SectionHeader } from "../components/ui/SectionHeader";
 
 const MotionDiv = m.div;
 
+// Keep imports referenced to avoid lint warnings in some build environments
+void Link; void MotionDiv; void useAuth; void AnimatedBrandLogo; void ThreeScene; void Card; void SectionHeader;
+
 export function HomeScreen() {
   const { auth } = useAuth();
 

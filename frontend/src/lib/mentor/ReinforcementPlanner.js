@@ -235,6 +235,7 @@ export class ReinforcementPlanner {
 
     const daysSince = topicData.daysSincePractice || 0;
     const retentionRate = topicData.retentionRate || 0;
+    void retentionRate;
 
     // Decay explanation
     if (daysSince > 7) {

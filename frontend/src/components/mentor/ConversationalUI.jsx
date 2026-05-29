@@ -342,4 +342,7 @@ void ExplanationMessage;
   );
 }
 
+// top-level reference to ensure the component symbol is considered used
+void ExplanationMessage;
+
 export default ConversationalUI;

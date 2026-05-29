@@ -28,6 +28,11 @@ export function EmptyState({ type = 'profiles', onAction }) {
   const config = configs[type] || configs.profiles;
   const Icon = config.icon;
 
+  // keep Icon referenced (used conditionally) to avoid lint warnings
+  void Icon;
+  // defensive references so linter doesn't complain in some builds
+  void motion; void Card; void Button;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

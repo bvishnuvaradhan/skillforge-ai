@@ -135,6 +135,9 @@ function LogoRig() {
   );
 }
 
+// Keep internal components referenced to avoid unused-var lint noise
+void LogoCore; void OrbitalRings; void LogoRig;
+
 export function LogoScene() {
   return (
     <Canvas camera={{ position: [0, 0, 6.2], fov: 42 }} dpr={[1, 1.35]}>

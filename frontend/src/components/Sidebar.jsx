@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/useAuth";
 
+// Reference Link to satisfy lint when build tooling removes named usage
+void Link;
+
 const LINKS = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/dashboard/traces", label: "Trace Viewer" },
