@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ForecastChart, ConsistencyGraph, DecayVisualization } from '../components/dashboard/VisualAnalytics';
 import { SkillDNAExperience } from '../components/dashboard/SkillDNAExperience';
 import { RetentionHeatmap } from '../components/dashboard/RetentionHeatmap';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import { LuDownload, LuShare2, LuArrowLeft } from 'react-icons/lu';
 
 export function AnalyticsPage({ onBack }) {
@@ -55,8 +57,12 @@ export function AnalyticsPage({ onBack }) {
             <p className="text-sm opacity-60">Deep dive into your learning patterns and skill evolution</p>
           </div>
           <div className="flex gap-2">
-            <button className="text-xs px-2 py-1 rounded bg-white/5">Export</button>
-            <button className="text-xs px-2 py-1 rounded bg-white/5">Share</button>
+            <Button variant="secondary" icon={LuDownload} className="text-xs">
+              Export
+            </Button>
+            <Button variant="secondary" icon={LuShare2} className="text-xs">
+              Share
+            </Button>
           </div>
         </div>
       </div>
@@ -85,12 +91,12 @@ export function AnalyticsPage({ onBack }) {
         transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.1 }}
       >
         <h2 className="text-2xl font-semibold mb-6">Your Learning DNA</h2>
-        <div className="p-8 relative overflow-hidden bg-white/5 border border-white/10 rounded-lg">
+        <Card depth="level2" className="p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl -z-1" />
           <div className="relative z-10">
             <SkillDNAExperience dnaData={mockDNA} />
           </div>
-        </div>
+        </Card>
       </motion.div>
 
       {/* Forecast & Consistency */}
@@ -101,12 +107,12 @@ export function AnalyticsPage({ onBack }) {
       >
         <h2 className="text-2xl font-semibold mb-6">Growth Trajectory</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-6 bg-white/5 border border-white/10 rounded-lg">
+          <Card depth="level2" className="p-6">
             <ForecastChart title="Mastery Forecast" timeframe={`${timeframe} forecast`} />
-          </div>
-          <div className="p-6 bg-white/5 border border-white/10 rounded-lg">
+          </Card>
+          <Card depth="level2" className="p-6">
             <ConsistencyGraph title="Learning Consistency" />
-          </div>
+          </Card>
         </div>
       </motion.div>
 
@@ -118,12 +124,12 @@ export function AnalyticsPage({ onBack }) {
       >
         <h2 className="text-2xl font-semibold mb-6">Skill Health</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-6 bg-white/5 border border-white/10 rounded-lg">
+          <Card depth="level2" className="p-6">
             <RetentionHeatmap topicStats={mockTopics} />
-          </div>
-          <div className="p-6 bg-white/5 border border-white/10 rounded-lg">
+          </Card>
+          <Card depth="level2" className="p-6">
             <DecayVisualization topics={mockTopics} />
-          </div>
+          </Card>
         </div>
       </motion.div>
 
