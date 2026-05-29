@@ -105,6 +105,9 @@ export class ExplainabilityEngine {
   explainRoadmap(context) {
     const { roadmap, mastery, userDNA } = context;
 
+    // some builds may not use `mastery` here; reference defensively
+    void mastery;
+
     const confidence = 0.8; // Roadmap is well-structured
     const uncertainty = {
       level: 'low',

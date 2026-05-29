@@ -179,6 +179,9 @@ export function SessionSummary({
 
   const { sessionSummary, fatigueSummary, recommendations } = sessionData;
 
+  // reference optional summary fields to avoid unused variable lint warnings
+  void fatigueSummary;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}

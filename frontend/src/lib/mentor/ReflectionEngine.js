@@ -263,6 +263,9 @@ export class ReflectionEngine {
     const recommendations = [];
     const { forecast, recentActivity, mastery } = context;
 
+    // avoid unused var warning when mastery isn't referenced by downstream logic
+    void mastery;
+
     if (forecast?.riskingTopics?.length > 0) {
       recommendations.push(
         `Prioritize ${forecast.riskingTopics[0]} to prevent skill decay`

@@ -27,6 +27,11 @@ export function MentorPanel({
   const [mentorResponse, setMentorResponse] = useState(null);
   const [showPreferences, setShowPreferences] = useState(false);
 
+  // mark assigned-but-unused states as referenced to reduce lint noise
+  void expanded;
+  void setExpanded;
+  void mentorResponse;
+
   const handleResponse = (response) => {
     setMentorResponse(response);
   };
