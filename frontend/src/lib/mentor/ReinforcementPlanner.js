@@ -193,6 +193,7 @@ export class ReinforcementPlanner {
 
     const daysSince = topicData.daysSincePractice;
     const retentionRate = topicData.retentionRate || 0;
+    void retentionRate;
 
     // If very recently practiced, defer
     if (daysSince < 1) {
