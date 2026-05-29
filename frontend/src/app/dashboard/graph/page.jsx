@@ -151,6 +151,20 @@ export function DependencyGraphPage({ onBack }) {
           </div>
         </Card>
       </motion.div>
+
+      {/* Selected topic details (uses selectedTopic so it's not unused) */}
+      {selectedTopic && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4"
+        >
+          <Card depth="level1" className="p-4">
+            <h4 className="text-sm font-semibold">Selected Topic</h4>
+            <p className="text-sm opacity-70">{selectedTopic}</p>
+          </Card>
+        </motion.div>
+      )}
     </motion.section>
   );
 }
