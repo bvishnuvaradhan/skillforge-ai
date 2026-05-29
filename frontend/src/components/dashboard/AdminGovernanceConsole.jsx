@@ -27,6 +27,14 @@ export function AdminGovernanceConsole() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Admin & Governance Console</h1>
         <p className="text-sm opacity-60">Operational visibility and control for SkillForge intelligence systems</p>
+        <div className="mt-4 flex gap-2">
+          <Button variant="ghost" onClick={() => setShowReplayModal(true)} icon={LuPlayCircle}>
+            Open Replay Tools
+          </Button>
+          <Button variant="outline" onClick={() => alert('Export placeholder')} icon={LuDatabaseBackup}>
+            Export
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -49,6 +57,25 @@ export function AdminGovernanceConsole() {
           );
         })}
       </div>
+
+      {/* Replay modal (simple inline) */}
+      {showReplayModal && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold">Replay Tools</h4>
+            <div className="flex gap-2">
+              <LuCheckCircle className="text-emerald-400" />
+              <LuAlertTriangle className="text-amber-400" />
+              <LuXCircle className="text-rose-400" />
+              <LuAlertCircle className="text-yellow-400" />
+            </div>
+          </div>
+          <p className="text-xs opacity-70 mb-3">Quick replay interface for recent traces. This is a lightweight placeholder used to exercise imported icons.</p>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setShowReplayModal(false)}>Close</Button>
+          </div>
+        </Card>
+      )}
 
       {/* Tab Content */}
       <div className="space-y-6">

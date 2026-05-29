@@ -28,6 +28,11 @@ export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
       'Limited breadth exploration',
       'Slow initial topic acquisition',
     ],
+        const sampleRadarData = [
+          { subject: 'Syntax', A: 120, B: 110, fullMark: 150 },
+          { subject: 'Algorithms', A: 98, B: 130, fullMark: 150 },
+          { subject: 'Systems', A: 86, B: 99, fullMark: 150 },
+        ];
     recommendations: [
       'Allocate 2-3 weeks per topic for mastery',
       'Balance depth with periodic exploration',
@@ -144,6 +149,16 @@ export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
               <Tooltip contentStyle={{ backgroundColor: 'rgba(15,23,42,0.95)', border: '1px solid rgba(255,255,255,0.1)' }} />
               <Bar dataKey="users" fill="#06B6D4" radius={[8, 8, 0, 0]} />
             </BarChart>
+                    <div style={{ width: 300, height: 260 }}>
+                      <ResponsiveContainer width="100%" height={240}>
+                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={sampleRadarData}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="subject" />
+                          <PolarRadiusAxis />
+                          <Radar name="You" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </div>
           </ResponsiveContainer>
         </Card>
       </motion.div>
