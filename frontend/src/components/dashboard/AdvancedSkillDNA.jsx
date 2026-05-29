@@ -35,11 +35,6 @@ export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
       'Limited breadth exploration',
       'Slow initial topic acquisition',
     ],
-        const sampleRadarData = [
-          { subject: 'Syntax', A: 120, B: 110, fullMark: 150 },
-          { subject: 'Algorithms', A: 98, B: 130, fullMark: 150 },
-          { subject: 'Systems', A: 86, B: 99, fullMark: 150 },
-        ];
     recommendations: [
       'Allocate 2-3 weeks per topic for mastery',
       'Balance depth with periodic exploration',
