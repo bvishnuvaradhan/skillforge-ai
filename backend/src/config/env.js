@@ -13,7 +13,7 @@ const envSchema = z.object({
   MONGODB_URI: z.string().min(1),
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
   GITHUB_TOKEN: z.string().optional(),
-  ANTHROPIC_API_KEY: z.string().optional(),
+  MISTRAL_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

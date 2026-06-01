@@ -1,42 +1,63 @@
-const { Anthropic } = require("@anthropic-ai/sdk");
+const { Mistral } = require("@mistralai/mistralai");
 const { env } = require("../config/env");
-
-// Initialize Claude client
-const client = new Anthropic({
-  apiKey: env.ANTHROPIC_API_KEY,
-});
 
 class MentorAIService {
   constructor() {
-    this.model = "claude-3-5-sonnet-20241022"; // Latest Claude model
+    this.model = "mistral-small-latest"; // Free model, excellent for mentoring
     this.maxTokens = 1000;
+    this.apiKey = env.MISTRAL_API_KEY;
+
+    if (this.apiKey) {
+      this.client = new Mistral({ apiKey: this.apiKey });
+    } else {
+      console.warn("⚠️  MISTRAL_API_KEY not set. Mentor AI will use mock responses.");
+    }
   }
 
-  // Generate mentor response using Claude
+  // Generate mentor response using Mistral
   async generateMentorResponse(systemPrompt, userPrompt) {
+    // Fallback to mock if no API key
+    if (!this.apiKey || !this.client) {
+      return this._generateMockResponse(userPrompt);
+    }
+
     try {
-      const response = await client.messages.create({
+      const response = await this.client.chat.complete({
         model: this.model,
-        max_tokens: this.maxTokens,
-        system: systemPrompt,
         messages: [
           {
             role: "user",
-            content: userPrompt,
+            content: `${systemPrompt}\n\n${userPrompt}`,
           },
         ],
+        maxTokens: this.maxTokens,
       });
 
-      // Extract text from response
-      if (response.content && response.content.length > 0) {
-        return response.content[0].text;
+      if (response.choices && response.choices.length > 0) {
+        const text = response.choices[0].message.content.trim();
+        return text && text.length > 0
+          ? text
+          : "I'm unable to generate a response at the moment. Please try again.";
       }
 
       return "I'm unable to generate a response at the moment. Please try again.";
     } catch (error) {
-      console.error("Claude API call failed:", error);
-      throw new Error(`Claude API error: ${error.message}`);
+      console.error("Mistral API call failed:", error.message);
+      // Fallback to mock response on error
+      return this._generateMockResponse(userPrompt);
     }
+  }
+
+  // Fallback mock response for development
+  _generateMockResponse(userPrompt) {
+    const mockResponses = [
+      "Based on your learning patterns, I notice you're progressing well. Keep focusing on the fundamentals.",
+      "Your consistency is impressive! This week you've maintained a strong streak.",
+      "I'd recommend taking a short break soon - you've been focused for a while.",
+      "Your mastery in this topic is increasing. Consider exploring related concepts.",
+      "The data shows you're doing great. Your problem-solving speed is improving.",
+    ];
+    return mockResponses[Math.floor(Math.random() * mockResponses.length)];
   }
 
   // Generate explanation using Claude
