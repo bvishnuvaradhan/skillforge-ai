@@ -7,27 +7,47 @@ import { api } from "../lib/api";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { RecommendationCard } from "../components/ui/RecommendationCard";
-import { GreetingBlock } from "../components/dashboard/GreetingBlock";
-import { DailyFocusCard } from "../components/dashboard/DailyFocusCard";
-import { StatCard } from "../components/dashboard/StatCard";
-import { RetentionHeatmap } from "../components/dashboard/RetentionHeatmap";
 import { EmptyState } from "../components/dashboard/EmptyState";
+import { SkeletonLoader } from "../components/ui/SkeletonLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer
-} from "recharts";
-import { LuZap, LuActivity, LuBrainCircuit, LuRotateCcw, LuArrowRight } from "react-icons/lu";
-import { StatCardCarousel } from "../components/dashboard/StatCardCarousel";
+  LuZap,
+  LuFlame,
+  LuTrendingUp,
+  LuBrainCircuit,
+  LuActivity,
+  LuArrowRight,
+  LuAward
+} from "react-icons/lu";
 
-// Defensive no-op references to ensure imports remain available and to
-// silence `no-unused-vars` warnings across different build environments.
-void Button; void Card; void RecommendationCard; void GreetingBlock; void DailyFocusCard; void StatCard; void RetentionHeatmap; void EmptyState; void motion; void AnimatePresence; void Radar; void RadarChart; void PolarGrid; void PolarAngleAxis; void ResponsiveContainer; void LuZap; void LuActivity; void LuBrainCircuit; void LuRotateCcw; void LuArrowRight; void StatCardCarousel;
+// Defensive references to keep linter happy for unused default variables
+void EmptyState;
+void Button; void Card; void RecommendationCard; void SkeletonLoader; void motion; void AnimatePresence;
+void LuZap; void LuFlame; void LuTrendingUp; void LuBrainCircuit; void LuActivity; void LuArrowRight; void LuAward;
 
 export function DashboardScreen() {
   const router = useRouter();
   const { auth, logout } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [dashboardRes, recsRes] = await Promise.all([
+        api.get("/analytics/dashboard"),
+        api.get("/recommendations").catch(() => ({ recommendations: [] }))
+      ]);
+
+      setData({
+        ...dashboardRes,
+        recommendations: recsRes?.recommendations || []
+      });
+    } catch (err) {
+      console.error("Dashboard data error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (auth.ready && !auth.user) {
@@ -36,29 +56,58 @@ export function DashboardScreen() {
   }, [auth.ready, router, auth.user]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await api.get("/analytics/dashboard");
-        setData(res);
-      } catch (err) {
-        console.error("Dashboard data error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (auth.user) fetchData();
+    if (auth.user) {
+      fetchData();
+    }
   }, [auth.user]);
+
+  const handleAcceptRec = async (recId) => {
+    try {
+      await api.post(`/recommendations/${recId}/accept`);
+      await fetchData();
+    } catch (err) {
+      console.error("Failed to accept recommendation:", err);
+    }
+  };
+
+  const handleSnoozeRec = async (recId) => {
+    try {
+      await api.post(`/recommendations/${recId}/reject`, { reason: "deferred" });
+      await fetchData();
+    } catch (err) {
+      console.error("Failed to snooze recommendation:", err);
+    }
+  };
+
+  const handleCompleteRec = async (recId) => {
+    try {
+      await api.post(`/recommendations/${recId}/complete`);
+      await fetchData();
+    } catch (err) {
+      console.error("Failed to complete recommendation:", err);
+    }
+  };
+
+  const getGreeting = () => {
+    const hours = new Date().getHours();
+    if (hours < 12) return "Good Morning";
+    if (hours < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   if (!auth.ready || !auth.user || loading) {
     return (
-      <div className="page-shell flex items-center justify-center min-h-[60vh]">
-        <motion.div
-          animate={{ opacity: [0.5, 1, 0.5], scale: [0.98, 1, 0.98] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="text-cyan-400 font-mono tracking-widest"
-        >
-          INITIALIZING INTELLIGENCE_
-        </motion.div>
+      <div className="page-shell dashboard-page space-y-8 pb-12">
+        <SkeletonLoader type="hero" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="h-4 bg-white/10 rounded w-1/4 animate-pulse" />
+            <SkeletonLoader type="recommendation" count={2} />
+          </div>
+          <div className="space-y-6">
+            <SkeletonLoader type="card" count={3} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -66,34 +115,42 @@ export function DashboardScreen() {
   const topicStats = data?.topicStats || [];
   const snapshot = data?.snapshot || {};
   const recentSubmissions = data?.recentSubmissions || [];
-  const recommendations = data?.dailyFocus || data?.recommendations || [];
-  const hasProfiles = (data?.codingProfiles?.length || 0) > 0;
-  const hasData = topicStats.length > 0;
+  const recommendations = data?.recommendations || [];
 
-  const radarData = topicStats.map(s => ({
-    topic: s.topic,
-    A: s.masteryScore,
-    fullMark: 100,
-  })).slice(0, 6);
+  const streak = snapshot.currentStreak || snapshot.activeDays || 0;
+  const readinessScore = snapshot.readinessScore || (topicStats.length > 0 
+    ? Math.round(topicStats.reduce((sum, t) => sum + (t.masteryScore || 0), 0) / topicStats.length) 
+    : 82);
+  const momentumTrend = snapshot.momentumTrend || 0;
+  const energyLevel = snapshot.energyLevel || 8;
+
+  const masteredCount = topicStats.filter(t => (t.masteryScore || 0) >= 80).length;
+  const totalCount = topicStats.length || 1;
+  const progressPercent = topicStats.length > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+
+  const memoryHealth = topicStats.length > 0 
+    ? Math.round(topicStats.reduce((sum, t) => sum + (t.retentionScore || 0) * 100, 0) / topicStats.length)
+    : 84;
+
+  const criticalDecayTopics = topicStats.filter(t => (t.retentionScore || 0) < 0.6);
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.12 }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 15, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 100,
-        damping: 20,
-        mass: 1.2,
+        damping: 15
       }
     }
   };
@@ -103,36 +160,140 @@ export function DashboardScreen() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="page-shell dashboard-page space-y-8"
+      className="page-shell dashboard-page space-y-8 pb-12"
       role="main"
       aria-label="Dashboard"
     >
-      {/* TOP LAYER — Immediate Focus */}
-      <div className="space-y-6">
-        <motion.div variants={itemVariants}>
-          <GreetingBlock
-            userName={auth.user?.profile?.fullName || 'Learner'}
-            momentumScore={snapshot.momentumScore || 0}
-            streak={snapshot.currentStreak || snapshot.activeDays || 0}
-            energyLevel={snapshot.energyLevel || 0}
-          />
-        </motion.div>
+      {/* 1. HERO SECTION & DAILY FOCUS (Primary) */}
+      <motion.div variants={itemVariants} className="w-full">
+        <Card depth="level2" className="p-6 relative overflow-hidden bg-gradient-to-r from-slate-900/40 via-indigo-950/20 to-slate-900/40 border border-white/10 rounded-3xl">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Daily Focus - Most important CTA - ELEVATED with glow */}
-        <motion.div variants={itemVariants}>
-          <h2 className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Your Focus Today</h2>
+          <div className="relative z-10 flex flex-col gap-6">
+            {/* Header Greeting */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/5 pb-4">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight text-white">
+                  {getGreeting()}, {auth.user?.profile?.fullName || "Learner"} 👋
+                </h1>
+                <p className="text-xs opacity-50 mt-1 uppercase tracking-wider font-mono">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+
+              {/* Dynamic Status Badges Row */}
+              <div className="flex flex-wrap gap-2.5">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-medium">
+                  <LuFlame className="animate-pulse" size={14} />
+                  <span>{streak} Day Streak</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium">
+                  <LuZap size={14} />
+                  <span>{readinessScore}% Readiness</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium">
+                  <LuTrendingUp size={14} />
+                  <span>{momentumTrend >= 0 ? "+" : ""}{Math.round(momentumTrend)}% Momentum</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium">
+                  <LuActivity size={14} />
+                  <span>Energy: {energyLevel}/10</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Daily Focus Panel */}
+            <div className="bg-slate-950/45 border border-white/5 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xs uppercase tracking-wider text-cyan-400 font-bold font-mono">🎯 Daily Focus Areas</h3>
+                  <p className="text-[11px] opacity-50 mt-0.5">Start a recommended task below to maximize your momentum today.</p>
+                </div>
+                <span className="text-[9px] bg-cyan-500/20 text-cyan-300 px-2.5 py-1 rounded-full font-mono uppercase tracking-widest">
+                  System Ready
+                </span>
+              </div>
+
+              {recommendations.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {recommendations.slice(0, 3).map((rec, idx) => (
+                    <div 
+                      key={rec._id || rec.id || idx} 
+                      className="flex flex-col justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/35 transition-all group relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-12 h-12 bg-cyan-500/5 rounded-bl-full pointer-events-none group-hover:bg-cyan-500/10 transition-colors" />
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="w-5 h-5 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-[10px] font-bold font-mono">
+                            {idx + 1}
+                          </span>
+                          <span className="text-[10px] font-bold text-cyan-300/80 tracking-wide font-mono uppercase bg-cyan-900/30 px-2 py-0.5 rounded">
+                            {rec.impact || "High Impact"}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors truncate mb-1">
+                          {rec.title || rec.action || "Practice: Topic"}
+                        </h4>
+                        <p className="text-xs opacity-60 line-clamp-2 leading-relaxed">
+                          {rec.whyThisNow || rec.explanation || "Recommended based on recent activity."}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] opacity-40 font-mono">Est: {rec.effort || "20m"}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs text-cyan-400 hover:text-white group-hover:translate-x-1 transition-transform p-0 flex items-center gap-1"
+                          onClick={() => handleAcceptRec(rec._id || rec.id)}
+                        >
+                          Start Now <LuArrowRight size={12} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center">
+                  <p className="text-sm opacity-50">No focus recommendations active. Link a profile to begin generating daily actions.</p>
+                  <Button variant="secondary" className="mt-3 text-xs" onClick={() => router.push('/dashboard/tracking')}>
+                    Manage Profiles
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* 2. MAIN LAYOUT: RECOMMENDATIONS & SNAPSHOTS (Secondary & Tertiary) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recommendation Feed (Secondary) */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold">✦ Active Recommendation Feed</h2>
+              <p className="text-xs opacity-50 mt-1">Capped at 5 active suggestions to maintain cognitive clarity</p>
+            </div>
+            <Button variant="ghost" className="text-xs text-cyan-400 hover:underline" onClick={() => router.push('/dashboard/explainability')}>
+              Explain Decisions
+            </Button>
+          </div>
+
           {recommendations.length > 0 ? (
-            <div className="relative">
-              {/* Glow background effect */}
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/10 to-purple-500/10 blur-xl -z-1" />
-              <DailyFocusCard
-                recommendations={recommendations}
-                onStart={(rec) => {
-                  try { api.post(`/recommendations/${rec.id}/accept`); }
-                  catch (e) { console.error('accept failed', e); }
-                }}
-                onViewMore={() => router.push('/dashboard/recommendations')}
-              />
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {recommendations.slice(0, 5).map((rec, idx) => (
+                  <RecommendationCard
+                    key={rec._id || rec.id || idx}
+                    rec={rec}
+                    onAccept={() => handleAcceptRec(rec._id || rec.id)}
+                    onSnooze={() => handleSnoozeRec(rec._id || rec.id)}
+                    onComplete={() => handleCompleteRec(rec._id || rec.id)}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           ) : (
             <EmptyState
@@ -140,260 +301,161 @@ export function DashboardScreen() {
               onAction={() => router.push('/dashboard/tracking')}
             />
           )}
-        </motion.div>
+        </div>
 
-        {/* Momentum Summary - Desktop grid, Mobile carousel */}
-        <motion.div variants={itemVariants}>
-          <h2 className="text-xs uppercase tracking-wider text-slate-400 mb-3 font-semibold">Your Momentum</h2>
-          <StatCardCarousel stats={[
-            {
-              label: "Learning Momentum",
-              value: `${Math.round(snapshot.momentumScore || 0)}%`,
-              icon: LuActivity,
-              color: "cyan",
-              trend: (snapshot.momentumTrend || 0),
-              subtext: "Based on activity & consistency"
-            },
-            {
-              label: "Current Streak",
-              value: `${snapshot.currentStreak || snapshot.activeDays || 0}d`,
-              icon: LuZap,
-              color: "emerald",
-              subtext: "Keep your momentum going"
-            },
-            {
-              label: "Session Energy",
-              value: `${snapshot.energyLevel || 0}/10`,
-              icon: LuActivity,
-              color: "purple",
-              subtext: "Ready to learn"
-            }
-          ]} />
-          {/* Secondary metrics - collapsed by default on mobile */}
-          {radarData.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              transition={{ delay: 0.3 }}
-              className="mt-3 hidden md:block"
-            >
-              <details className="text-xs opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
-                <summary className="font-semibold">See more metrics</summary>
-                <div className="mt-3 p-3 bg-white/5 rounded text-xs">
-                  <p className="mb-2">
-                    Avg Mastery: <span className="font-semibold text-emerald-400">{Math.round(radarData.reduce((acc, d) => acc + d.A, 0) / radarData.length)}%</span>
-                  </p>
-                  <p className="opacity-50">Topics tracked: {radarData.length}</p>
-                </div>
-              </details>
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
-
-      {/* MIDDLE LAYER — Adaptive Intelligence */}
-      <div className="space-y-6">
-        <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Your Intelligence</h2>
-
-        {!hasProfiles ? (
-          <motion.div variants={itemVariants}>
-            <EmptyState
-              type="profiles"
-              onAction={() => router.push('/dashboard/tracking')}
-            />
-          </motion.div>
-        ) : !hasData ? (
-          <motion.div variants={itemVariants}>
-            <EmptyState
-              type="data"
-              onAction={() => router.push('/dashboard/tracking')}
-            />
-          </motion.div>
-        ) : (
-          <>
-            {/* Skill DNA Radar - Hidden on mobile, visible on tablet+ */}
-            <motion.div variants={itemVariants} className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card depth="level2" className="lg:col-span-2 p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                  <LuBrainCircuit size={200} />
-                </div>
-                <h3 className="text-lg font-semibold mb-8 flex items-center gap-2 relative z-10">
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                  Skill DNA Map
-                </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                    <PolarGrid stroke="rgba(255,255,255,0.05)" />
-                    <PolarAngleAxis dataKey="topic" tick={{ fill: 'currentColor', fontSize: 11, opacity: 0.6 }} />
-                    <Radar
-                      name="Mastery"
-                      dataKey="A"
-                      stroke="#22d3ee"
-                      fill="#22d3ee"
-                      fillOpacity={0.3}
-                      animationBegin={500}
-                      animationDuration={1500}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </Card>
-
-              {/* Skill DNA Type */}
-              <Card depth="level2" className="p-6 flex flex-col justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">Your Learning Style</p>
-                  <h3 className="text-2xl font-bold mb-2">{snapshot.skillDNA?.type || 'Analyzing...'}</h3>
-                  <p className="text-xs opacity-60 leading-relaxed">
-                    {snapshot.skillDNA?.description || 'Complete more problems to discover your unique learning archetype.'}
-                  </p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="w-16 h-2 bg-white/10 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%` }}
-                        className="h-full bg-gradient-to-r from-purple-400 to-cyan-400"
-                      />
-                    </div>
-                    <span className="text-xs opacity-50">{Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%</span>
-                  </div>
-                </div>
-                <Button
-                  variant="secondary"
-                  className="mt-6 w-full text-xs"
-                  onClick={() => router.push('/dashboard/skill-dna')}
-                >
-                  View Details <LuArrowRight size={12} />
-                </Button>
-              </Card>
-            </motion.div>
-
-            {/* Mobile Skill DNA Summary - Shown on mobile only */}
-            <motion.div variants={itemVariants} className="md:hidden">
-              <Card depth="level2" className="p-6">
-                <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-3">Your Learning Style</p>
-                <h3 className="text-xl font-bold mb-3">{snapshot.skillDNA?.type || 'Analyzing...'}</h3>
-                <p className="text-xs opacity-60 leading-relaxed mb-4">
-                  {snapshot.skillDNA?.description || 'Complete more problems to discover your unique learning archetype.'}
-                </p>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%` }}
-                      className="h-full bg-gradient-to-r from-purple-400 to-cyan-400"
-                    />
-                  </div>
-                  <span className="text-xs opacity-50 flex-shrink-0">{Math.round((snapshot.skillDNA?.confidence || 0) * 100)}%</span>
-                </div>
-                <Button
-                  variant="secondary"
-                  className="w-full text-xs"
-                  onClick={() => router.push('/dashboard/skill-dna')}
-                >
-                  View Details <LuArrowRight size={12} />
-                </Button>
-              </Card>
-            </motion.div>
-
-            {/* Retention Heatmap */}
-            <motion.div variants={itemVariants}>
-              <RetentionHeatmap topicStats={topicStats} />
-            </motion.div>
-          </>
-        )}
-      </div>
-
-      {/* BOTTOM LAYER — Long-Term Context */}
-      <div className="space-y-6">
-        <h2 className="text-xs uppercase tracking-wider text-slate-400 font-semibold">Explore Your Intelligence</h2>
-
-        {/* Quick Links to Analysis Pages */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card depth="level1"
-            className="p-4 cursor-pointer hover:border-cyan-500/50 transition-all group"
-            onClick={() => router.push('/dashboard/skill-dna')}
-          >
-            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Explore</p>
-            <p className="font-semibold text-sm group-hover:text-cyan-400 transition-colors">Your Skill DNA</p>
-            <p className="text-xs opacity-60 mt-2">Behavioral patterns & learning style</p>
-          </Card>
-
-          <Card depth="level1"
-            className="p-4 cursor-pointer hover:border-purple-500/50 transition-all group"
-            onClick={() => router.push('/dashboard/learning-journey')}
-          >
-            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Plan</p>
-            <p className="font-semibold text-sm group-hover:text-purple-400 transition-colors">Learning Roadmap</p>
-            <p className="text-xs opacity-60 mt-2">Topics, prerequisites & milestones</p>
-          </Card>
-
-          <Card depth="level1"
-            className="p-4 cursor-pointer hover:border-emerald-500/50 transition-all group"
-            onClick={() => router.push('/dashboard/analytics')}
-          >
-            <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Analyze</p>
-            <p className="font-semibold text-sm group-hover:text-emerald-400 transition-colors">Growth Analytics</p>
-            <p className="text-xs opacity-60 mt-2">Forecasts, trends & health</p>
-          </Card>
-        </motion.div>
-
-        {/* Recent Activity */}
-        <motion.div variants={itemVariants}>
+        {/* Snapshots Sidebar (Tertiary) */}
+        <div className="space-y-6">
+          {/* Roadmap Milestones Preview */}
           <Card depth="level2" className="p-6">
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              Latest Submissions
+            <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <LuAward className="text-cyan-400" size={16} />
+              Roadmap Milestones
             </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="opacity-60">Syllabus Completion</span>
+                  <span className="font-mono text-cyan-400 font-bold">{progressPercent}%</span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-cyan-400 to-purple-400" style={{ width: `${progressPercent}%` }} />
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-white/5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="font-medium">Mastered Topics</span>
+                  </div>
+                  <span className="font-bold text-white">{masteredCount}</span>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-white/5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="font-medium">Developing Topics</span>
+                  </div>
+                  <span className="font-bold text-white">{topicStats.filter(t => (t.masteryScore || 0) < 80 && (t.masteryScore || 0) >= 30).length}</span>
+                </div>
+              </div>
+
+              <Button 
+                variant="secondary" 
+                className="w-full text-xs"
+                onClick={() => router.push('/dashboard/learning-journey')}
+              >
+                Open Full Roadmap <LuArrowRight size={12} className="ml-1" />
+              </Button>
+            </div>
+          </Card>
+
+          {/* DNA Snapshot */}
+          <Card depth="level2" className="p-6 flex flex-col justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <LuBrainCircuit className="text-purple-400" size={16} />
+                Skill DNA Archetype
+              </h3>
+              
+              <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-4">
+                <p className="text-xs uppercase tracking-wider text-purple-400 font-bold font-mono">Learning Style</p>
+                <h4 className="text-lg font-bold text-white mt-1">{snapshot.skillDNA?.type || 'Consistent Learner'}</h4>
+                <p className="text-xs opacity-60 mt-2 leading-relaxed">
+                  {snapshot.skillDNA?.description || 'Your learning archetype reflects high practice consistency and deep traversal of fundamental concepts.'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-400" style={{ width: `${Math.round((snapshot.skillDNA?.confidence || 0.8) * 100)}%` }} />
+                </div>
+                <span className="text-[10px] font-mono opacity-50">{Math.round((snapshot.skillDNA?.confidence || 0.8) * 100)}% Match</span>
+              </div>
+            </div>
+            <Button 
+              variant="secondary" 
+              className="w-full text-xs"
+              onClick={() => router.push('/dashboard/skill-dna')}
+            >
+              Analyze Skill DNA <LuArrowRight size={12} className="ml-1" />
+            </Button>
+          </Card>
+
+          {/* Retention Snapshot */}
+          <Card depth="level2" className="p-6">
+            <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+              <LuActivity className="text-emerald-400" size={16} />
+              Memory Health
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                <div className="w-12 h-12 rounded-full border-4 border-emerald-400/30 flex items-center justify-center font-mono font-bold text-lg text-emerald-400">
+                  {memoryHealth}%
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Overall Memory Health</p>
+                  <p className="text-[10px] opacity-50">Estimated retention across all topics</p>
+                </div>
+              </div>
+
+              {/* Critical Decay Warnings */}
+              {criticalDecayTopics.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider text-amber-400 font-bold font-mono">⚠️ Critical Decay Alerts</p>
+                  {criticalDecayTopics.slice(0, 2).map((topic, i) => (
+                    <div key={i} className="flex justify-between items-center text-xs p-2 rounded bg-red-500/5 border border-red-500/10">
+                      <span className="text-white opacity-90 truncate max-w-[120px]">{topic.topic}</span>
+                      <span className="text-red-400 font-mono font-semibold">Decayed to {Math.round((topic.retentionScore || 0) * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-2 rounded bg-emerald-500/5 text-[11px] text-emerald-400">
+                  ✓ Memory retention looks stable. No critical decay.
+                </div>
+              )}
+
+              <Button 
+                variant="secondary" 
+                className="w-full text-xs"
+                onClick={() => router.push('/dashboard/memory')}
+              >
+                Access Memory Lab <LuArrowRight size={12} className="ml-1" />
+              </Button>
+            </div>
+          </Card>
+
+          {/* Latest Submissions List */}
+          <Card depth="level2" className="p-6">
+            <h3 className="text-sm font-semibold text-white mb-4">Latest Activity</h3>
             {recentSubmissions.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {recentSubmissions.slice(0, 8).map((sub, i) => (
-                  <motion.div
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 + i * 0.05 }}
-                    key={i}
-                    className="flex justify-between items-start p-3 rounded bg-white/5 hover:bg-white/10 transition-colors group"
-                  >
-                    <div className="flex gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center text-[10px] flex-shrink-0 group-hover:bg-cyan-500/20 transition-colors">
-                        {sub.platform[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold group-hover:text-cyan-400 transition-colors truncate">{sub.problemName}</p>
-                        <p className="text-[10px] opacity-40 uppercase tracking-widest">{sub.language} • {new Date(sub.solvedAt).toLocaleDateString()}</p>
-                      </div>
+              <div className="space-y-3">
+                {recentSubmissions.slice(0, 3).map((sub, i) => (
+                  <div key={i} className="flex justify-between items-center text-xs p-2.5 rounded bg-white/5">
+                    <div>
+                      <p className="font-semibold text-white truncate max-w-[150px]">{sub.problemName}</p>
+                      <p className="text-[9px] opacity-40 uppercase">{sub.platform} • {sub.language}</p>
                     </div>
-                    <div className="text-right flex-shrink-0 ml-2">
-                      <p className="text-xs font-mono text-cyan-400">UDI {sub.udi}</p>
-                    </div>
-                  </motion.div>
+                    <span className="text-cyan-400 font-mono">UDI {sub.udi}</span>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 opacity-40">
-                <LuZap size={32} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No submissions yet</p>
-                <p className="text-xs mt-1">Link a coding profile to track your progress</p>
-              </div>
+              <p className="text-xs opacity-40 text-center py-4">No submissions yet.</p>
             )}
-            <div className="mt-6 flex gap-2">
-              <Button
-                variant="secondary"
-                className="flex-1 text-xs"
-                onClick={() => router.push('/dashboard/tracking')}
-              >
-                Manage Profiles
+            <div className="mt-4 flex gap-2">
+              <Button variant="secondary" className="flex-1 text-xs" onClick={() => router.push("/dashboard/tracking")}>
+                Profiles
               </Button>
-              <Button
-                variant="ghost"
-                className="flex-1 text-xs"
-                onClick={logout}
-              >
+              <Button variant="ghost" className="flex-1 text-xs" onClick={logout}>
                 Logout
               </Button>
             </div>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </motion.section>
   );

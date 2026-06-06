@@ -18,8 +18,8 @@ export function EmptyState({ type = 'profiles', onAction }) {
       action: 'View Tracking',
     },
     recommendations: {
-      title: 'No Recommendations Yet',
-      description: 'Keep solving problems and your adaptive system will generate personalized recommendations.',
+      title: "You're Currently Caught Up! 🎉",
+      description: "No pending revision triggers or critical decay. Consider exploring Graph Algorithms or strengthen Dynamic Programming to level up.",
       icon: LuCompass,
       action: 'Explore Learning Paths',
     }

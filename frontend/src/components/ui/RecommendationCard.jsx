@@ -36,12 +36,13 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
   }[state] || 'border-cyan-500/50';
 
   const stateLabel = {
-    active: 'Ready to Learn',
-    reinforcing: 'Solidify Skills',
-    exploring: 'Expand Horizons',
-    critical: 'Needs Attention',
-    deferred: 'For Later'
-  }[state] || 'Ready';
+    active: 'New Guidance',
+    reinforcing: 'Reinforcing',
+    exploring: 'Exploring',
+    critical: 'Urgent Review',
+    deferred: 'Deferred for Later',
+    completed: 'Completed'
+  }[state] || 'New';
 
   const stateMessage = {
     active: 'You\'re ready for this—let\'s level up together',
@@ -53,9 +54,10 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ type: 'spring', stiffness: 100, damping: 15 }}
       layout
     >
       <Card className={`min-w-[340px] border-l-4 hover:shadow-lg transition-all ${stateColor}`}>
@@ -114,8 +116,8 @@ export function RecommendationCard({ rec = {}, onAccept, onSnooze, onComplete })
 
           {/* Actions */}
           <div className="mt-4 flex gap-2">
-            <Button variant="primary" onClick={onAccept} className="flex-1 text-xs">Start</Button>
-            <Button variant="secondary" onClick={onSnooze} className="flex-1 text-xs">Snooze</Button>
+            <Button variant="primary" onClick={onAccept} className="flex-1 text-xs">Accept Practice</Button>
+            <Button variant="secondary" onClick={onSnooze} className="flex-1 text-xs">Defer for Later</Button>
             <InlineExplainButton
               questionType="recommendation"
               context={{

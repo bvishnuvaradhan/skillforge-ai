@@ -9,6 +9,9 @@ void Link;
 
 const LINKS = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/dashboard/memory", label: "Memory Lab" },
+  { to: "/dashboard/explainability", label: "Explainability Center" },
+  { to: "/dashboard/team", label: "Team Dashboard" },
   { to: "/dashboard/traces", label: "Trace Viewer" },
   { to: "/dashboard/tracking", label: "Tracking" },
   { to: "/settings", label: "Settings" },

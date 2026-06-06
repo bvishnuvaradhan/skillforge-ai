@@ -53,7 +53,7 @@ export function MobileResponsiveLayout({ children, density = 'medium' }) {
   );
 }
 
-// Adaptive grid that changes based on device
+// Adaptive grid that changes based on device, using compile-time safe classes
 export function ResponsiveGrid({ children, columns = { mobile: 1, tablet: 2, desktop: 3 } }) {
   const [windowWidth, setWindowWidth] = React.useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -66,9 +66,15 @@ export function ResponsiveGrid({ children, columns = { mobile: 1, tablet: 2, des
   }, []);
 
   const gridClass = useMemo(() => {
-    if (windowWidth < BREAKPOINTS.mobile) return `grid-cols-${columns.mobile}`;
-    if (windowWidth < BREAKPOINTS.tablet) return `grid-cols-${columns.tablet}`;
-    return `grid-cols-${columns.desktop}`;
+    const cols = windowWidth < BREAKPOINTS.mobile ? columns.mobile :
+                 windowWidth < BREAKPOINTS.tablet ? columns.tablet :
+                 columns.desktop;
+                 
+    if (cols === 1) return 'grid-cols-1';
+    if (cols === 2) return 'grid-cols-2';
+    if (cols === 3) return 'grid-cols-3';
+    if (cols === 4) return 'grid-cols-4';
+    return 'grid-cols-3';
   }, [windowWidth, columns]);
 
   return (
@@ -123,7 +129,7 @@ export function MobileChart({ title, data, type = 'bar' }) {
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full"
-                style={{ width: `${(item.value / maxValue) * 100}%` }}
+                style={{ width: `${maxValue > 0 ? (item.value / maxValue) * 100 : 0}%` }}
               />
             </div>
           </div>

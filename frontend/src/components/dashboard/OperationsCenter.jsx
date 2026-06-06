@@ -16,7 +16,7 @@ import {
   LuTrash2,
   LuDatabaseBackup,
   LuZap,
-  LuCheckCircle
+  LuCircleCheck
 } from 'react-icons/lu';
 
 export function OperationsCenter() {
@@ -138,7 +138,7 @@ export function OperationsCenter() {
             exit={{ opacity: 0, y: -20 }}
             className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3"
           >
-            <LuCheckCircle className="text-emerald-400" size={20} />
+            <LuCircleCheck className="text-emerald-400" size={20} />
             <span className="text-sm font-medium text-emerald-300">{actionSuccess.message}</span>
           </motion.div>
         )}

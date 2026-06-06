@@ -8,6 +8,13 @@ import { LuZoomIn, LuZoomOut, LuRefreshCw } from 'react-icons/lu';
 // Defensive refs for imports and internal state used to silence linter warnings
 void motion; void Card; void Button; void LuZoomIn; void LuZoomOut; void LuRefreshCw;
 
+const getNodeBorder = (status, mastery) => {
+  if (mastery >= 0.8 || status === 'mastered') return 'border-emerald-500/50 shadow-emerald-500/10 text-emerald-400';
+  if (mastery <= 0.4 || status === 'critical') return 'border-rose-500/60 shadow-rose-500/25 text-rose-400 animate-pulse';
+  if (mastery <= 0.6 || status === 'weak') return 'border-amber-500/50 shadow-amber-500/10 text-amber-400';
+  return 'border-cyan-500/30 text-cyan-400';
+};
+
 export function DependencyGraphExplorer({ topics = [], onSelectTopic }) {
   const [selectedNode, setSelectedNode] = useState(null);
   const [zoom, setZoom] = useState(1);
@@ -42,17 +49,6 @@ export function DependencyGraphExplorer({ topics = [], onSelectTopic }) {
     });
     return edgeList;
   }, [graphData]);
-
-  const getNodeColor = (status) => {
-    switch (status) {
-      case 'mastered': return { bg: 'from-emerald-500/30 to-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-400' };
-      case 'developing': return { bg: 'from-cyan-500/30 to-cyan-500/10', border: 'border-cyan-500/50', text: 'text-cyan-400' };
-      case 'recommended': return { bg: 'from-amber-500/30 to-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-400', ring: true };
-      case 'available': return { bg: 'from-slate-500/20 to-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-400' };
-      case 'locked': return { bg: 'from-red-500/20 to-red-500/10', border: 'border-red-500/30', text: 'text-red-400' };
-      default: return { bg: 'from-slate-500/20 to-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-400' };
-    }
-  };
 
   const selectedNodeData = selectedNode ? graphData.find(t => t.id === selectedNode) : null;
 
@@ -113,16 +109,16 @@ export function DependencyGraphExplorer({ topics = [], onSelectTopic }) {
               if (!from || !to) return null;
 
               const isSelected = selectedNode === edge.to || selectedNode === edge.from;
-              const strokeColor = isSelected ? 'rgba(34, 211, 238, 0.6)' : 'rgba(148, 163, 184, 0.3)';
+              const strokeColor = isSelected ? 'rgba(34, 211, 238, 0.6)' : 'rgba(148, 163, 184, 0.2)';
               const markerUrl = isSelected ? 'url(#arrowheadHighlight)' : 'url(#arrowhead)';
 
               return (
                 <line
                   key={idx}
-                  x1={from.x + 40}
-                  y1={from.y + 30}
-                  x2={to.x + 40}
-                  y2={to.y + 30}
+                  x1={from.x + 65}
+                  y1={from.y + 37.5}
+                  x2={to.x + 65}
+                  y2={to.y + 37.5}
                   stroke={strokeColor}
                   strokeWidth={isSelected ? 2 : 1}
                   markerEnd={markerUrl}
@@ -134,66 +130,39 @@ export function DependencyGraphExplorer({ topics = [], onSelectTopic }) {
             {/* Nodes */}
             {graphData.map((topic, idx) => {
               const isSelected = selectedNode === topic.id;
-              const color = getNodeColor(topic.status);
-              void color;
+              const borderClass = getNodeBorder(topic.status, topic.mastery);
               const masteryPct = Math.round((topic.mastery || 0) * 100);
 
               return (
-                <g
+                <foreignObject
                   key={`${topic.id}-${idx}`}
+                  x={topic.x}
+                  y={topic.y}
+                  width="130"
+                  height="75"
                   onClick={() => setSelectedNode(isSelected ? null : topic.id)}
                   className="cursor-pointer"
                 >
-                  {/* Node bg circle */}
-                  <motion.circle
-                    cx={topic.x + 40}
-                    cy={topic.y + 30}
-                    r={isSelected ? 45 : 35}
-                    fill={isSelected ? 'rgba(6, 182, 212, 0.2)' : 'rgba(100, 116, 139, 0.1)'}
-                    stroke={isSelected ? 'rgba(6, 182, 212, 0.8)' : 'rgba(148, 163, 184, 0.5)'}
-                    strokeWidth={isSelected ? 2.5 : 1.5}
-                    animate={{ r: isSelected ? 45 : 35 }}
-                    transition={{ duration: 0.2 }}
-                  />
-
-                  {/* Mastery ring */}
-                  <motion.circle
-                    cx={topic.x + 40}
-                    cy={topic.y + 30}
-                    r={isSelected ? 50 : 40}
-                    fill="none"
-                    stroke="rgba(34, 211, 238, 0.3)"
-                    strokeWidth={1}
-                    strokeDasharray={`${masteryPct * 2} 200`}
-                  />
-
-                  {/* Status indicator */}
-                  {topic.isRecommended && (
-                    <motion.circle
-                      cx={topic.x + 40}
-                      cy={topic.y + 30}
-                      r={55}
-                      fill="none"
-                      stroke="rgba(251, 191, 36, 0.6)"
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
-                      animate={{ strokeDashoffset: [0, -10] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatType: 'loop' }}
-                    />
-                  )}
-
-                  {/* Label text */}
-                  <text
-                    x={topic.x + 40}
-                    y={topic.y + 30}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="text-xs font-semibold fill-white pointer-events-none"
-                    style={{ fontSize: isSelected ? '11px' : '9px' }}
+                  <div
+                    className={`p-2.5 rounded-xl border flex flex-col justify-between h-full select-none transition-all duration-300 ${
+                      isSelected
+                        ? 'bg-slate-900/80 ring-2 ring-cyan-400 border-cyan-400 shadow-lg scale-102'
+                        : 'bg-slate-900/50 backdrop-blur-md shadow-xs hover:border-white/30'
+                    } ${borderClass}`}
                   >
-                    {masteryPct}%
-                  </text>
-                </g>
+                    <div>
+                      <div className="text-[10px] font-bold text-white/90 truncate leading-tight">{topic.name}</div>
+                      {topic.isRecommended && (
+                        <span className="text-[7px] px-1 bg-amber-500/30 text-amber-300 rounded font-mono">REC</span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-baseline mt-1 border-t border-white/5 pt-1.5">
+                      <span className="text-[8px] opacity-60 capitalize truncate max-w-[60px]">{topic.status || 'available'}</span>
+                      <span className="text-xs font-black font-mono">{masteryPct}%</span>
+                    </div>
+                  </div>
+                </foreignObject>
               );
             })}
           </svg>
@@ -222,48 +191,75 @@ export function DependencyGraphExplorer({ topics = [], onSelectTopic }) {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-1"
           >
-            <Card className="p-4 bg-gradient-to-b from-cyan-500/10 to-cyan-500/5 border border-cyan-500/30 h-full flex flex-col">
-              <h3 className="font-semibold text-sm mb-4">{selectedNodeData.name}</h3>
-
-              <div className="space-y-3 flex-1">
-                <div>
-                  <p className="text-xs opacity-50 uppercase tracking-wider mb-1">Mastery</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-cyan-400 to-purple-400"
-                        style={{ width: `${selectedNodeData.mastery * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-bold text-cyan-400">{Math.round(selectedNodeData.mastery * 100)}%</span>
-                  </div>
+            <Card className="p-5 bg-gradient-to-b from-cyan-500/10 to-cyan-500/5 border border-cyan-500/30 h-full flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="border-b border-white/5 pb-2">
+                  <span className="text-[10px] uppercase tracking-wider text-cyan-400 font-semibold">Selected Topic</span>
+                  <h3 className="font-semibold text-lg text-white mt-0.5">{selectedNodeData.name}</h3>
                 </div>
 
-                <div>
-                  <p className="text-xs opacity-50 uppercase tracking-wider mb-1">Status</p>
-                  <p className="text-sm capitalize font-medium">{selectedNodeData.status}</p>
-                </div>
-
-                {selectedNodeData.deps?.length > 0 && (
+                <div className="space-y-3">
                   <div>
-                    <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Prerequisites</p>
-                    <div className="space-y-1">
-                      {selectedNodeData.deps.map((depId) => {
-                        const dep = graphData.find(t => t.id === depId);
-                        return (
-                          <div key={depId} className="text-xs bg-white/10 p-2 rounded opacity-70">
-                            {dep?.name}
-                          </div>
-                        );
-                      })}
+                    <p className="text-xs opacity-50 uppercase tracking-wider mb-1">Mastery Score</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-400 to-purple-400"
+                          style={{ width: `${selectedNodeData.mastery * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-bold text-cyan-400 font-mono">{Math.round(selectedNodeData.mastery * 100)}%</span>
                     </div>
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-xs opacity-50 uppercase tracking-wider mb-1">Cognitive Retention</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400"
+                          style={{ width: `${Math.round((selectedNodeData.retention || selectedNodeData.mastery * 0.9) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-bold text-emerald-400 font-mono">
+                        {Math.round((selectedNodeData.retention || selectedNodeData.mastery * 0.9) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedNodeData.deps?.length > 0 && (
+                    <div>
+                      <p className="text-xs opacity-50 uppercase tracking-wider mb-2">Prerequisites</p>
+                      <div className="space-y-1">
+                        {selectedNodeData.deps.map((depId) => {
+                          const dep = graphData.find(t => t.id === depId);
+                          return (
+                            <div key={depId} className="text-xs bg-white/5 p-2 rounded opacity-75 border border-white/5">
+                              {dep?.name}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <Button variant="secondary" className="w-full text-xs mt-4">
-                Start Learning
-              </Button>
+              <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                  <p className="text-[10px] uppercase tracking-wider text-purple-300 font-semibold mb-1">AI Recommendation</p>
+                  <p className="text-xs opacity-80 leading-relaxed">
+                    {selectedNodeData.mastery >= 0.8
+                      ? `You've achieved high mastery! Consider reviewing related concepts to maintain stability.`
+                      : `You may benefit from practicing ${selectedNodeData.name} fundamentals this week to solidify your foundations.`
+                    }
+                  </p>
+                </div>
+
+                <Button variant="secondary" className="w-full text-xs">
+                  Accept Practice
+                </Button>
+              </div>
             </Card>
           </motion.div>
         )}

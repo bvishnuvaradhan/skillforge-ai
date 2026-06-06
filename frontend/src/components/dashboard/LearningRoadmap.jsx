@@ -138,7 +138,14 @@ function RoadmapNode({ topic, status, isRecommended, isExpanded, onToggle, recom
                   </span>
                 )}
               </div>
-              <p className="text-xs opacity-60">{topic.description}</p>
+              <p className="text-xs opacity-60">
+                {status === 'locked'
+                  ? (topic.prerequisites && topic.prerequisites.length > 0
+                      ? `Complete ${topic.prerequisites.join(' & ')} first to unlock ${topic.name}.`
+                      : `Complete prerequisites first to unlock ${topic.name}.`)
+                  : topic.description
+                }
+              </p>
             </div>
           </div>
 

@@ -23,6 +23,32 @@ void ResponsiveContainer;
 // Keep commonly imported chart symbols and helpers referenced for lint
 void LineChart; void Line; void BarChart; void Bar; void XAxis; void YAxis; void CartesianGrid; void Tooltip; void Legend; void TraitCard;
 
+const getArchetypeDetails = (type) => {
+  switch (type) {
+    case 'Deep Diver':
+      return {
+        statement: 'You learn fastest through deep repetition and structured progression.',
+        learningStyle: 'Focuses intensely on a single topic, achieving high mastery before moving on.',
+        consistencyPattern: 'Sustained, daily focus blocks with minimal interruptions. Strong retention stability.',
+        explorationPattern: 'Prefers depth over breadth, occasionally benefits from structured exploration sessions.'
+      };
+    case 'Explorer':
+      return {
+        statement: 'You learn fastest through broad conceptual exposure and diverse practical application.',
+        learningStyle: 'Explores multiple related topics concurrently, building connections between domains.',
+        consistencyPattern: 'Dynamic, bursts of intense learning across multiple topics. Shorter, frequent sessions.',
+        explorationPattern: 'High exploration drive, naturally discovers new concepts but needs guidance to solidify retention.'
+      };
+    default:
+      return {
+        statement: 'You learn fastest through balanced practice and data-backed reinforcement.',
+        learningStyle: 'Balances depth and breadth, leveraging analytics-driven insights to guide focus.',
+        consistencyPattern: 'Consistent rhythm matching suggested pacing intervals.',
+        explorationPattern: 'Structured exploration within locked path bounds.'
+      };
+  }
+};
+
 export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
   const [compareWith, setCompareWith] = useState('average');
 
@@ -75,6 +101,7 @@ export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
   ];
 
   const userDNAData = { ...mockUserDNA, ...userDNA };
+  const archetype = getArchetypeDetails(userDNAData.type);
 
   return (
     <motion.div
@@ -92,43 +119,60 @@ export function AdvancedSkillDNA({ userDNA = {}, peerData = [] }) {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="p-8 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-4xl font-bold mb-4">{userDNAData.type}</h3>
-              <div className="flex items-center gap-4 mb-6">
+            <div className="space-y-5">
+              <div>
+                <span className="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold uppercase tracking-wider">
+                  {userDNAData.type}
+                </span>
+                <h3 className="text-xl font-bold mt-2 mb-4 leading-snug">{archetype.statement}</h3>
+              </div>
+
+              <div className="flex items-center gap-4 mb-4">
                 <div>
                   <p className="text-xs opacity-50 mb-1">Confidence</p>
-                  <p className="text-2xl font-bold text-cyan-400">{Math.round(userDNAData.confidence * 100)}%</p>
+                  <p className="text-2xl font-bold text-cyan-400 font-mono">{Math.round(userDNAData.confidence * 100)}%</p>
                 </div>
                 <div>
-                  <p className="text-xs opacity-50 mb-1">Percentile</p>
-                  <p className="text-2xl font-bold text-purple-400">{userDNAData.percentile}th</p>
+                  <p className="text-xs opacity-50 mb-1">Percentile Rank</p>
+                  <p className="text-2xl font-bold text-purple-400 font-mono">{userDNAData.percentile}th</p>
                 </div>
               </div>
-              <p className="opacity-80 mb-6">Your learning profile places you in the top {100 - userDNAData.percentile}% of learners in your archetype.</p>
-              <Button variant="secondary" className="w-full text-sm">
-                Generate Optimization Plan
-              </Button>
+
+              <div className="border-t border-white/5 pt-4 space-y-3">
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">Learning Style</h4>
+                  <p className="text-xs opacity-75 mt-0.5">{archetype.learningStyle}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">Consistency Pattern</h4>
+                  <p className="text-xs opacity-75 mt-0.5">{archetype.consistencyPattern}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">Exploration Pattern</h4>
+                  <p className="text-xs opacity-75 mt-0.5">{archetype.explorationPattern}</p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-6">
               <div>
-                <p className="text-xs opacity-50 uppercase tracking-wider mb-3">Key Strengths</p>
+                <p className="text-xs opacity-50 uppercase tracking-wider mb-3 font-semibold">Key Strengths</p>
                 <ul className="space-y-2">
                   {userDNAData.strengths.map((s, i) => (
                     <li key={i} className="text-sm flex gap-2">
-                      <span className="text-emerald-400">✓</span>
-                      <span>{s}</span>
+                      <span className="text-emerald-400 font-bold">✓</span>
+                      <span className="opacity-80">{s}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs opacity-50 uppercase tracking-wider mb-3">Growth Areas</p>
+                <p className="text-xs opacity-50 uppercase tracking-wider mb-3 font-semibold">Growth Opportunities</p>
                 <ul className="space-y-2">
                   {userDNAData.weaknesses.map((w, i) => (
                     <li key={i} className="text-sm flex gap-2">
-                      <span className="text-amber-400">→</span>
-                      <span>{w}</span>
+                      <span className="text-amber-400 font-bold">→</span>
+                      <span className="opacity-80">{w}</span>
                     </li>
                   ))}
                 </ul>
