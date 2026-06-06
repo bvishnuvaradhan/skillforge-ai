@@ -9,6 +9,7 @@ const { formatExplanationForDisplay } = require("../explanation/basic");
 const { enrichRecommendationWithExplanation } = require("../services/explainability.service");
 const { updateHistoricalAccuracyAsync } = require("../services/feedback-learning.service");
 const { transitionLifecycle } = require("../services/arbitration/recommendation-lifecycle");
+const cache = require("../lib/cache");
 const { z } = require("zod");
 
 const router = Router();
@@ -19,6 +20,12 @@ const router = Router();
  */
 router.get("/", requireAuth, async (req, res) => {
   try {
+    const cacheKey = `user:${req.user.id}:recommendations`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ recommendations: cached, _fromCache: true });
+    }
+
     const active = await RecommendationLifecycleModel.find({
       user: req.user.id,
       state: "active"
@@ -53,6 +60,8 @@ router.get("/", requireAuth, async (req, res) => {
       };
     });
 
+    await cache.set(cacheKey, withPriority, 300); // Cache for 5 minutes (300 seconds)
+
     res.status(200).json({ recommendations: withPriority });
   } catch (error) {
     console.error("[RecommendationRoute] GET / error:", error.message);
@@ -67,6 +76,7 @@ router.get("/", requireAuth, async (req, res) => {
 router.post("/generate", requireAuth, async (req, res) => {
   try {
     const recs = await generateRecommendations(req.user.id);
+    await cache.del(`user:${req.user.id}:recommendations`);
     res.status(200).json({
       message: `Generated ${recs.length} recommendations`,
       recommendations: recs
@@ -117,6 +127,8 @@ router.post("/:id/accept", requireAuth, async (req, res) => {
     } catch (err) {
       console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
     }
+
+    await cache.del(`user:${req.user.id}:recommendations`);
 
     res.status(200).json({ message: "Recommendation accepted", recommendation: rec });
   } catch (error) {
@@ -169,6 +181,8 @@ router.post("/:id/reject", requireAuth, async (req, res) => {
       console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
     }
 
+    await cache.del(`user:${req.user.id}:recommendations`);
+
     res.status(200).json({ message: "Recommendation rejected", recommendation: rec });
   } catch (error) {
     console.error("[RecommendationRoute] POST /reject error:", error.message);
@@ -216,6 +230,8 @@ router.post("/:id/complete", requireAuth, async (req, res) => {
     } catch (err) {
       console.warn("[RecommendationRoute] lifecycle sync warning:", err.message);
     }
+
+    await cache.del(`user:${req.user.id}:recommendations`);
 
     res.status(200).json({ message: "Recommendation completed", recommendation: rec });
   } catch (error) {

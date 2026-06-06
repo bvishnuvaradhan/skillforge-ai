@@ -12,7 +12,7 @@ async function run() {
     return;
   }
 
-  const files = fs.readdirSync(testDir).filter(f => f.endsWith('.js'));
+  const files = fs.readdirSync(testDir).filter(f => f.endsWith('.js') && !f.includes('k6'));
   for (const file of files) {
     const full = path.join(testDir, file);
     console.log('->', file);

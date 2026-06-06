@@ -9,6 +9,7 @@ const { RecommendationModel } = require("../models/Recommendation");
 const { RecommendationHistoryModel } = require("../models/RecommendationHistory");
 const { SubmissionModel } = require("../models/Submission");
 const { mentorAIService } = require("../services/mentor-ai.service");
+const cache = require("../lib/cache");
 
 const router = Router();
 
@@ -23,6 +24,12 @@ router.get("/:userId/roadmap", requireAuth, async (req, res) => {
     // Verify user is requesting their own data or is admin
     if (req.user.id !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const cacheKey = `user:${userId}:mentor:roadmap`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
     }
 
     const graph = await DependencyGraphModel.findOne({ user: userId });
@@ -42,11 +49,14 @@ router.get("/:userId/roadmap", requireAuth, async (req, res) => {
       };
     });
 
-    res.json({
+    const result = {
       nodes: graph.nodes || [],
       edges: graph.edges || [],
       userProgress
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -62,6 +72,12 @@ router.get("/:userId/retention", requireAuth, async (req, res) => {
 
     if (req.user.id !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const cacheKey = `user:${userId}:mentor:retention`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
     }
 
     const topicStats = await TopicStatModel.find({ user: userId });
@@ -82,7 +98,9 @@ router.get("/:userId/retention", requireAuth, async (req, res) => {
       decayRates[stat.topic] = stat.decayRate || 0.15;
     });
 
-    res.json({ heatmap, decayRates });
+    const result = { heatmap, decayRates };
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -100,6 +118,12 @@ router.get("/:userId/mastery", requireAuth, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const cacheKey = `user:${userId}:mentor:mastery`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
+    }
+
     const topicStats = await TopicStatModel.find({ user: userId });
     const mastery = {};
 
@@ -107,6 +131,7 @@ router.get("/:userId/mastery", requireAuth, async (req, res) => {
       mastery[stat.topic] = stat.score || 0;
     });
 
+    await cache.set(cacheKey, mastery, 300); // 5 min TTL
     res.json(mastery);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -125,6 +150,12 @@ router.get("/:userId/dna", requireAuth, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const cacheKey = `user:${userId}:mentor:dna`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
+    }
+
     const dna = await DNAProfileModel.findOne({ user: userId });
     if (!dna) {
       // Return default DNA if not found
@@ -140,7 +171,7 @@ router.get("/:userId/dna", requireAuth, async (req, res) => {
       });
     }
 
-    res.json({
+    const result = {
       type: dna.dnaType || 'Unknown',
       confidence: dna.confidence || 0.5,
       description: dna.description || '',
@@ -149,7 +180,10 @@ router.get("/:userId/dna", requireAuth, async (req, res) => {
       difficultyPreference: dna.difficultyPreference || 0.5,
       focusStyle: dna.focusStyle || 'balanced',
       learningRhythm: dna.learningRhythm || 'variable'
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -167,6 +201,12 @@ router.get("/:userId/forecast", requireAuth, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const cacheKey = `user:${userId}:mentor:forecast`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
+    }
+
     const forecast = await DecayForecastModel.findOne({ user: userId }).sort({ createdAt: -1 });
 
     if (!forecast) {
@@ -180,13 +220,16 @@ router.get("/:userId/forecast", requireAuth, async (req, res) => {
       });
     }
 
-    res.json({
+    const result = {
       predictions: forecast.predictions || {},
       timeHorizon: forecast.timeHorizon || 7,
       confidence: forecast.confidence || 0.5,
       trendingTopics: forecast.trendingTopics || [],
       riskingTopics: forecast.riskingTopics || []
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -204,8 +247,14 @@ router.get("/:userId/governance", requireAuth, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const cacheKey = `user:${userId}:mentor:governance`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
+    }
+
     // Return governance policies (currently hardcoded, could be stored in DB)
-    res.json({
+    const result = {
       policies: [
         { type: 'cooldown', active: false, durationDays: 1 },
         { type: 'readiness', active: true, masteryThreshold: 0.6 }
@@ -215,7 +264,10 @@ router.get("/:userId/governance", requireAuth, async (req, res) => {
       constraints: [
         { type: 'max_recommendations_per_day', value: 5 }
       ]
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -231,6 +283,12 @@ router.get("/:userId/activity", requireAuth, async (req, res) => {
 
     if (req.user.id !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const cacheKey = `user:${userId}:mentor:activity`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
     }
 
     // Calculate recent activity
@@ -250,14 +308,17 @@ router.get("/:userId/activity", requireAuth, async (req, res) => {
       ? new Date(Math.max(...recentSubmissions.map(s => new Date(s.solvedAt))))
       : null;
 
-    res.json({
+    const result = {
       sessionsLastWeek: Math.ceil(recentSubmissions.length / 5) || 0,
       problemsSolvedLastWeek: recentSubmissions.length,
       averageSessionDuration: 45,
       currentStreak: 3,
       lastActivityTime: lastActivity ? lastActivity.getTime() : Date.now() - 3600000,
       focusTopics
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -273,6 +334,12 @@ router.get("/:userId/recommendation-history", requireAuth, async (req, res) => {
 
     if (req.user.id !== userId) {
       return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const cacheKey = `user:${userId}:mentor:recommendation-history`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, _fromCache: true });
     }
 
     const recommendations = await RecommendationHistoryModel.find({ user: userId }).sort({ createdAt: -1 }).limit(20);
@@ -298,7 +365,7 @@ router.get("/:userId/recommendation-history", requireAuth, async (req, res) => {
       .slice(0, 5)
       .map(r => r.topic);
 
-    res.json({
+    const result = {
       recommendations: recommendations.map(r => ({
         id: r._id,
         topic: r.topic,
@@ -308,7 +375,10 @@ router.get("/:userId/recommendation-history", requireAuth, async (req, res) => {
       completionRate,
       averageEffectiveness: avgEffectiveness,
       recentRecommendations
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -333,7 +403,9 @@ router.post("/:userId/response", requireAuth, async (req, res) => {
 
     const response = await mentorAIService.generateMentorResponse(
       systemPrompt,
-      userPrompt
+      userPrompt,
+      userId,
+      "mentor_response"
     );
 
     res.json({ response });
@@ -362,7 +434,8 @@ router.post("/:userId/explain", requireAuth, async (req, res) => {
 
     const explanation = await mentorAIService.generateExplanation(
       explanationType,
-      context
+      context,
+      userId
     );
 
     res.json({ explanation });
@@ -393,7 +466,8 @@ router.post("/:userId/insight", requireAuth, async (req, res) => {
 
     const insight = await mentorAIService.generateCoachingInsight(
       learnerProfile,
-      recentActivity
+      recentActivity,
+      userId
     );
 
     res.json({ insight });
@@ -420,7 +494,7 @@ router.post("/:userId/reflection", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Missing weeklyData" });
     }
 
-    const reflection = await mentorAIService.generateReflection(weeklyData);
+    const reflection = await mentorAIService.generateReflection(weeklyData, userId);
 
     res.json({ reflection });
   } catch (error) {

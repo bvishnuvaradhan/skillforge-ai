@@ -6,6 +6,7 @@ const { SkillDecayModel } = require("../models/SkillDecay");
 const { enrichInsight } = require("../services/insight-enrichment.service");
 const { RecommendationModel } = require("../models/Recommendation");
 const { SubmissionModel } = require("../models/Submission");
+const cache = require("../lib/cache");
 
 const router = Router();
 
@@ -15,6 +16,12 @@ const router = Router();
 router.get("/dashboard", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
+    const cacheKey = `user:${userId}:analytics:dashboard`;
+    
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ ...cached, _fromCache: true });
+    }
     
     const topicStats = await TopicStatModel.find({ user: userId });
     const latestSnapshot = await AnalyticsSnapshotModel.findOne({ user: userId }).sort({ date: -1 });
@@ -23,11 +30,14 @@ router.get("/dashboard", requireAuth, async (req, res) => {
       .sort({ solvedAt: -1 })
       .limit(10);
 
-    res.status(200).json({
+    const result = {
       topicStats,
       snapshot: latestSnapshot,
       recentSubmissions
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -38,10 +48,19 @@ router.get("/dashboard", requireAuth, async (req, res) => {
  */
 router.get("/decay", requireAuth, async (req, res) => {
   try {
+    const cacheKey = `user:${req.user.id}:analytics:decay`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ ...cached, _fromCache: true });
+    }
+
     const decayLogs = await SkillDecayModel.find({ user: req.user.id })
       .sort({ checkedAt: -1 })
       .limit(50);
-    res.status(200).json({ decayLogs });
+
+    const result = { decayLogs };
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -53,15 +72,24 @@ router.get("/decay", requireAuth, async (req, res) => {
 router.get("/recommendations", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
+    const cacheKey = `user:${userId}:analytics:recommendations`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ ...cached, _fromCache: true });
+    }
+
     const criticalTopics = await SkillDecayModel.find({ 
       user: userId, 
       status: 'critical' 
     }).sort({ retentionScore: 1 }).limit(5);
 
-    res.status(200).json({
+    const result = {
       queue: criticalTopics,
       nextAction: criticalTopics.length > 0 ? `Revise ${criticalTopics[0].topic}` : "Explore new topics"
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -73,6 +101,12 @@ router.get("/recommendations", requireAuth, async (req, res) => {
 router.get("/insights", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
+    const cacheKey = `user:${userId}:analytics:insights`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ ...cached, _fromCache: true });
+    }
+
     const enrichedInsights = [];
 
     // 1. Fetch all data sources
@@ -227,11 +261,15 @@ router.get("/insights", requireAuth, async (req, res) => {
       return scoreB - scoreA;
     });
 
-    res.status(200).json({
+    const result = {
       insights: enrichedInsights,
       total: enrichedInsights.length,
       timestamp: new Date()
-    });
+    };
+
+    await cache.set(cacheKey, result, 300); // 5 min TTL
+
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

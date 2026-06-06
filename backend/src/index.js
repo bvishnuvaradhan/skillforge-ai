@@ -3,6 +3,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const { traceExpressRequest } = require("./services/telemetry");
+const errorTracker = require("./lib/error-tracker");
 const { env } = require("./config/env");
 const { connectDatabase } = require("./lib/db");
 const { authRouter } = require("./routes/auth");
@@ -17,6 +19,7 @@ const { arbitrationRouter } = require("./routes/arbitration");
 const { tracesRouter } = require("./routes/traces");
 const { observabilityRouter } = require("./routes/observability");
 const { mentorRouter } = require("./routes/mentor");
+const { teamRouter } = require("./routes/team");
 const { initWorkers } = require("./workers");
 const { scrapingQueue, analyticsQueue } = require("./lib/queue");
 
@@ -34,6 +37,9 @@ try {
 }
 
 const app = express();
+
+// Mount OpenTelemetry Express request tracing middleware first
+app.use(traceExpressRequest());
 
 app.use(helmet());
 // Support multiple origins (comma-separated in CLIENT_ORIGIN) for dev (e.g. localhost:3000,3001)
@@ -67,6 +73,23 @@ app.get("/api/v1", (_req, res) => {
   });
 });
 
+// Route all business routes to /api/v1 namespace prefix
+const apiPrefix = "/api/v1";
+app.use(`${apiPrefix}/auth`, authRouter);
+app.use(`${apiPrefix}/profiles`, profileRouter);
+app.use(`${apiPrefix}/analytics`, analyticsRouter);
+app.use(`${apiPrefix}/recommendations`, recommendationsRouter);
+app.use(`${apiPrefix}/admin`, adminRouter);
+app.use(`${apiPrefix}/dna`, dnaRouter);
+app.use(`${apiPrefix}/decay`, decayRouter);
+app.use(`${apiPrefix}/dependencies`, dependenciesRouter);
+app.use(`${apiPrefix}/arbitration`, arbitrationRouter);
+app.use(`${apiPrefix}/traces`, tracesRouter);
+app.use(`${apiPrefix}/observability`, observabilityRouter);
+app.use(`${apiPrefix}/mentor`, mentorRouter);
+app.use(`${apiPrefix}/teams`, teamRouter);
+
+// Maintain temporary fallback wrappers for backward compatibility
 app.use("/api/auth", authRouter);
 app.use("/api/profiles", profileRouter);
 app.use("/api/analytics", analyticsRouter);
@@ -79,6 +102,7 @@ app.use("/api/arbitration", arbitrationRouter);
 app.use("/api/traces", tracesRouter);
 app.use("/api/observability", observabilityRouter);
 app.use("/api/mentor", mentorRouter);
+app.use("/api/teams", teamRouter);
 
 // NOTE: 404 handler will be registered after optional runtime mounts (e.g., Bull Board)
 
@@ -109,6 +133,16 @@ async function start() {
   // 404 handler (registered after dynamic mounts)
   app.use((_req, res) => {
     res.status(404).json({ error: "Not found" });
+  });
+
+  // Global error handler with Sentry error tracker integration
+  app.use((err, req, res, next) => {
+    errorTracker.captureException(err, {
+      url: req.url,
+      method: req.method,
+      ip: req.ip
+    });
+    res.status(500).json({ error: "Internal Server Error" });
   });
 
   app.listen(env.PORT, () => {

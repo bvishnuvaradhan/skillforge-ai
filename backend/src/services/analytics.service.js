@@ -3,6 +3,7 @@ const { TopicStatModel } = require("../models/TopicStat");
 const { AnalyticsSnapshotModel } = require("../models/AnalyticsSnapshot");
 const { SkillDecayModel } = require("../models/SkillDecay");
 const { CodingProfileModel } = require("../models/CodingProfile");
+const cache = require("../lib/cache");
 
 /**
  * Main analytics service to process user data and generate insights.
@@ -24,6 +25,9 @@ async function processUserAnalytics(userId) {
     
     // 4. Detect DNA Patterns (v1) with Confidence
     await detectDNAPatterns(userId);
+    
+    // Invalidate user cache since data has changed
+    await cache.invalidateUserCache(userId);
     
     return { success: true };
   } catch (error) {

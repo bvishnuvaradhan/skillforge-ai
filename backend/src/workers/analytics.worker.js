@@ -1,5 +1,6 @@
 const { Worker } = require("bullmq");
 const { connection, SKIP_QUEUES } = require("../lib/queue");
+const { env } = require("../config/env");
 const { processUserAnalytics } = require("../services/analytics.service");
 const { generateRecommendations } = require("../recommendation/detector");
 const { computeDNAv2 } = require("../services/dna-v2");
@@ -173,7 +174,7 @@ if (SKIP_QUEUES) {
       throw error;
     }
   },
-    { connection, concurrency: 2 }
+    { connection, concurrency: env.CONCURRENCY_ANALYTICS }
   );
 }
 

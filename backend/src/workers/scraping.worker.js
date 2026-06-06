@@ -1,6 +1,7 @@
 const { Worker } = require("bullmq");
 const { connection, SKIP_QUEUES } = require("../lib/queue");
 const { performSync } = require("../services/sync.service");
+const { env } = require("../config/env");
 
 if (SKIP_QUEUES) {
   const stub = {
@@ -15,7 +16,7 @@ if (SKIP_QUEUES) {
       const { userId, platform, username } = job.data;
       return performSync(userId, platform, username);
     },
-    { connection }
+    { connection, concurrency: env.CONCURRENCY_SCRAPING }
   );
 
   scrapingWorker.on("failed", (job, err) => {

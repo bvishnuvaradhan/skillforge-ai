@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6-jammy
+    container_name: skillforge-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: skillforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skillforge-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URL=mongodb://mongodb:27017/skillforge
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=supersecretjwtkeyforlocaldevelopmentonly
+      - CLIENT_ORIGIN=http://localhost:3000
+      - MISTRAL_API_KEY=mock-key-for-local-testing
+      - NODE_ENV=development
+      - CONCURRENCY_SCRAPING=2
+      - CONCURRENCY_ANALYTICS=2
+      - ENABLE_TELEMETRY_CONSOLE=true
+    depends_on:
+      - mongodb
+      - redis
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skillforge-worker
+    environment:
+      - PORT=5001
+      - MONGO_URL=mongodb://mongodb:27017/skillforge
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=supersecretjwtkeyforlocaldevelopmentonly
+      - CLIENT_ORIGIN=http://localhost:3000
+      - MISTRAL_API_KEY=mock-key-for-local-testing
+      - NODE_ENV=development
+      - CONCURRENCY_SCRAPING=4
+      - CONCURRENCY_ANALYTICS=4
+      - ENABLE_TELEMETRY_CONSOLE=true
+    depends_on:
+      - mongodb
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: skillforge-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  redis_data:

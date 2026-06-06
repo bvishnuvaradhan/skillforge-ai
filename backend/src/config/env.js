@@ -14,6 +14,8 @@ const envSchema = z.object({
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
   GITHUB_TOKEN: z.string().optional(),
   MISTRAL_API_KEY: z.string().optional(),
+  CONCURRENCY_SCRAPING: z.coerce.number().default(2),
+  CONCURRENCY_ANALYTICS: z.coerce.number().default(2),
 });
 
 const parsed = envSchema.safeParse(process.env);
